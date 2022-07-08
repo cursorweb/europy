@@ -1,5 +1,3 @@
-from abc import abstractclassmethod
-
 from .lf import LineInfo
 
 
@@ -11,7 +9,6 @@ class EoError:
     def display(self):
         print(f"File '{self.lf.file}' [{self.lf.line}:{self.lf.col}] {self.get_error()}")
     
-    @abstractclassmethod
     def get_error(self) -> str:
         return self.msg
 

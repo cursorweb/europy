@@ -1,4 +1,7 @@
+from typing import Any
+
 from error.lf import LineInfo
+
 
 class TType:
     ''' Delimiters '''
@@ -87,4 +90,10 @@ class TType:
 
 class Token:
     type: TType
-    lineinfo: LineInfo
+    lf: LineInfo
+    data: Any
+
+    def __init__(self, type: TType, lf: LineInfo, data: Any = None) -> None:
+        self.type = type
+        self.lf = lf
+        self.data = data
