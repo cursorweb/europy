@@ -1,5 +1,5 @@
-import lexer
-import parser
-import interpreter
+from lexer import Lexer
+from parser import Parser
+from interpreter import Interpreter
 
 print('hello, python!')
