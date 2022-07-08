@@ -4,7 +4,7 @@ from error.lf import LineInfo
 
 
 class TType:
-    ''' Delimiters '''
+    """ Delimiters """
     LeftBBrace = '{{'
     RightBBrace = '}}'
 
@@ -27,7 +27,7 @@ class TType:
     Semi = ';'
 
 
-    ''' Comparison '''
+    """ Comparison """
     Not = '!'
     EqEq = '=='
     NotEq = '!='
@@ -37,7 +37,7 @@ class TType:
     LessEq = '<='
 
 
-    ''' Assignment '''
+    """ Assignment """
     Eq = '='
     PlusEq = '+='
     MinusEq = '-='
@@ -47,7 +47,7 @@ class TType:
     ModEq = '%='
 
 
-    ''' Operators '''
+    """ Operators """
     Plus = '+'
     Minus = '-'
     Times = '*'
@@ -59,7 +59,7 @@ class TType:
     Question = '?'
 
 
-    ''' Literals '''
+    """ Literals """
     Identifier = 'Identifier'
     String = 'String'
     Number = 'Number'
@@ -68,7 +68,7 @@ class TType:
     Nil = 'nil'
 
 
-    ''' Keywords '''
+    """ Keywords """
     Fn = 'fn'
     Return = 'return'
     Var = 'var'
