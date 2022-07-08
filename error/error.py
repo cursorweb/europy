@@ -1,7 +1,7 @@
 from .lf import LineInfo
 
 
-class EoError:
+class EoError(BaseException):
     def __init__(self, etype: str, lf: LineInfo, msg: str):
         """
         etype: The error type, e.g. SyntaxError

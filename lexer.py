@@ -1,5 +1,7 @@
 from error.lf import LineInfo
+from error import SyntaxError
 from tokens import Token, TType
+
 
 class Lexer:
     i = 0
@@ -8,23 +10,40 @@ class Lexer:
     code: str
     lenc: int
     """ LEN(Code) """
+    lf: LineInfo
 
-    def __init__(self, file: str) -> None:
+
+    def __init__(self) -> None:
+        self.i = 0
+        self.tokens = []
+    
+    @classmethod
+    def from_file(cls, file: str) -> 'Lexer':
+        lexer = cls()
+
         f = open(file, 'r')
         code = f.read()
         f.close()
 
-        self.code = code
-        self.lenc = len(code)
+        lexer.code = code
+        lexer.lenc = len(code)
 
-        self.lf = LineInfo(file, 1, 1)
+        lexer.lf = LineInfo(file, 1, 1)
+        
+        return lexer
 
-    def from_repl(self, code: str) -> None:
-        self.code = code
-        self.lenc = len(code)
+    @classmethod
+    def from_repl(cls, code: str) -> 'Lexer':
+        lexer = cls()
 
-        self.lf = LineInfo("<repl>", 1, 1)
+        lexer.code = code
+        lexer.lenc = len(code)
+
+        lexer.lf = LineInfo("<repl>", 1, 1)
+
+        return lexer
     
+
     def run(self):
         while self.is_valid():
             char = self.code[self.i]
@@ -32,6 +51,8 @@ class Lexer:
             if char == '{':
                 if self.match('{'): self.append_token(TType.LeftBBrace)
                 else: self.append_token(TType.LeftBrace)
+            else:
+                raise SyntaxError(self.lf, f"Unexpected token '{char}'")
 
             self.next()
     
