@@ -1,0 +1,16 @@
+using io;
+using math.*;
+using random.range;
+using types.as_num;
+
+var num = as_num(io.readln("I'm thinking of a number 1-10: "));
+var guess = range(1, 10); // num 1-10
+var tries = 0;
+
+while num != guess {
+    io.println("Too " + (if num > guess { "high" } else { "low" }) + "!");
+    num = as_num(io.readln("Try again!: "));
+    tries += 1;
+}
+
+io.println("Good job! You did it in " + tries + " tries.");

@@ -1,0 +1,58 @@
+program => statement* EOF
+
+
+# statements
+statement => exprStmt | varDecl | block | ifStmt | whileStmt | doWhileStmt | breakStmt | continueStmt | fnDecl | returnStmt | useStmt
+
+exprStmt => ( expr ";" )
+varDecl => "var" IDENTIFIER ("=" expr )? ";"
+
+ifStmt => "if" expr block ( "elif" expr block )* ( "else" block )?
+
+whileStmt => "while" expr block
+doWhileStmt => "do" block "while" expr ";"
+forStmt => "for" ( ( IDENTIFIER "in" expr ) | ( "(" IDENTIFIER "in" expr ")" ) ) block
+
+breakStmt => "break" ";"
+continueStmt => "continue" ";"
+
+fnDecl => "fn" IDENTIFIER function
+returnStmt => "return" expr? ";"
+
+useStmt => "use" IDENTIFIER ( "." ( ( "{" ( IDENTIFIER "," )* IDENTIFIER "}" ) | IDENTIFIER | "*" ) ) ";"
+
+
+# expressions
+expr => range
+range => ternary ( ( ".." | ".=" ) ternary )?
+
+ternary => assignment ( "?" expr ":" ternary )?
+assignment => ( IDENTIFIER ( "=" | "+=" | "-=" | "*=" | "/=" | "**=" | "%=" ) assignment ) | or
+
+or => and ( "or" and )*
+and => equality ( "and" equality )*
+
+equality => comparison ( ( "==" | "!=" ) comparison )*
+comparison => addition ( ( ">" | "<" | ">=" | "<=" ) addition )*
+
+addition => times ( ( "-" | "+" ) times )*
+times => unary ( ( "*" | "/" | "%" ) unary )*
+
+unary => ( ( "!" | "-" ) unary ) | call
+call => primary ( "(" args? ")" | "[" expr "]" | "." IDENTIFIER )*
+
+primary => NUMBER | STRING | IDENTIFIER | "true" | "false" | "nil" | "(" expr ")" | block | ifStmt | array | maps
+
+block => "{" statement* "}"
+array => "[" ( expr "," )* ( expr )? "]"
+maps => "{{" ( expr ":" expr? "," )* ( expr ":" expr? )? "}}"
+
+args => ( expr | IDENTIFIER "=" expr ) ( "," ( expr | IDENTIFER "=" expr ) )*
+params => ( IDENTIFIER | IDENTIFIER "=" expr ) ( "," ( IDENTIFIER | IDENTIFIER "=" expr ) )*
+
+function => "(" params? ")" block
+
+
+IDENTIFIER => [ _ a-z A-Z ]? [ _ a-z A-Z 0-9 ]*
+NUMBER => [ 0-9 _ ]+ ( "." [ 0-9 _ ]+ )?
+STRING => ( "\"" ( [ ^"\"" ]+ ) "\"" ) | ( "'" ( [ ^"'" ]+ ) "'" ) | ( "`"+ ( [ ^"`"+ ]+ ) "`"+ )
