@@ -1,3 +1,5 @@
+import copy
+
 class LineInfo:
     line: int
     col: int
@@ -7,3 +9,6 @@ class LineInfo:
         self.file = file
         self.line = line
         self.col = col
+    
+    def copy(self):
+        return copy.deepcopy(self)

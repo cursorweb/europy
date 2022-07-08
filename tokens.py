@@ -89,11 +89,11 @@ class TType:
     EOF = 'eof'
 
 class Token:
-    type: TType
+    ttype: TType
     lf: LineInfo
     data: Any
 
-    def __init__(self, type: TType, lf: LineInfo, data: Any = None) -> None:
-        self.type = type
+    def __init__(self, ttype: TType, lf: LineInfo, data: Any = None) -> None:
+        self.ttype = ttype
         self.lf = lf
         self.data = data
