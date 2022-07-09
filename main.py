@@ -7,15 +7,13 @@ from error.lf import LineInfo
 from error import EoError
 
 lexer = Lexer.from_repl('''
-+ * **
-/* a b c
-*/
-// ee
--
+use io;
+var a = 2 + 2; // sets a
+io.println(a);
 ''')
 
 try:
     for token in lexer.run():
-        print(token.ttype, token.lf.line, token.lf.col)
+        print(token.ttype, f"{token.data!r}" if token.data else '')
 except EoError as e:
     e.display()

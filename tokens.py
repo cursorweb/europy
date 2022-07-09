@@ -63,8 +63,8 @@ class TType:
     Identifier = 'Identifier'
     String = 'String'
     Number = 'Number'
-    TrueIdt = 'true'
-    FalseIdt = 'false'
+    T_True = 'true'
+    T_False = 'false'
     Nil = 'nil'
 
 
