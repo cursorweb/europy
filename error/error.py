@@ -1,3 +1,4 @@
+from tokens import Token
 from .lf import LineInfo
 
 
@@ -22,3 +23,7 @@ class IoError(EoError):
 class SyntaxError(EoError):
     def __init__(self, lf: LineInfo, msg: str):
         super().__init__('SyntaxError', lf, msg)
+
+class EoTypeError(EoError):
+    def __init__(self, lf: Token, msg: str):
+        super().__init__('TypeError', lf.lf, msg)
