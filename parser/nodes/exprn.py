@@ -8,58 +8,55 @@ from tokens import Token
 # things like interpreter, resolver will 'implement' this
 class ExprVisitor(ABC):
     @abstractmethod
-    def assign(e: 'Assign'): pass
+    def assign(self, e: 'Assign'): pass
 
     @abstractmethod
-    def binary(e: 'Binary'): pass
+    def binary(self, e: 'Binary'): pass
 
     @abstractmethod
-    def grouping(e: 'Grouping'): pass
+    def grouping(self, e: 'Grouping'): pass
 
     @abstractmethod
-    def literal(e: 'Literal'): pass
-
-    @abstractmethod
-    def unary(e: 'Unary'): pass
-
-    @abstractmethod
-    def unary(e: 'Unary'): pass
-
-    @abstractmethod
-    def variable(e: 'Variable'): pass
-
-    @abstractmethod
-    def block(e: 'Block'): pass
-
-    @abstractmethod
-    def logical(e: 'Logical'): pass
-
-    @abstractmethod
-    def ternary(e: 'Ternary'): pass
-
-    @abstractmethod
-    def call(e: 'Call'): pass
-
-    @abstractmethod
-    def if_expr(e: 'IfExpr'): pass
-
-    @abstractmethod
-    def get(e: 'Get'): pass
-
-    @abstractmethod
-    def set(e: 'Set'): pass
-
-    @abstractmethod
-    def prop(e: 'Prop'): pass
-
-    @abstractmethod
-    def array(e: 'Array'): pass
-
-    @abstractmethod
-    def map(e: 'Map'): pass
+    def literal(self, e: 'Literal'): pass
     
     @abstractmethod
-    def range(e: 'Range'): pass
+    def unary(self, e: 'Unary'): pass
+
+    @abstractmethod
+    def variable(self, e: 'Variable'): pass
+
+    @abstractmethod
+    def block(self, e: 'Block'): pass
+
+    @abstractmethod
+    def logical(self, e: 'Logical'): pass
+
+    @abstractmethod
+    def ternary(self, e: 'Ternary'): pass
+
+    @abstractmethod
+    def call(self, e: 'Call'): pass
+
+    @abstractmethod
+    def if_expr(self, e: 'IfExpr'): pass
+
+    @abstractmethod
+    def get(self, e: 'Get'): pass
+
+    @abstractmethod
+    def set(self, e: 'Set'): pass
+
+    @abstractmethod
+    def prop(self, e: 'Prop'): pass
+
+    @abstractmethod
+    def array(self, e: 'Array'): pass
+
+    @abstractmethod
+    def map(self, e: 'Map'): pass
+    
+    @abstractmethod
+    def range(self, e: 'Range'): pass
 
 
 class Expr(ABC):

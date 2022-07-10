@@ -16,11 +16,11 @@ class EoError(BaseException):
     def display(self):
         print(f"File '{self.lf.file}' [{self.lf.line}:{self.lf.col}] {self.etype} {self.msg}")
 
-class IoError(EoError):
+class EoIoError(EoError):
     def __init__(self, file: str, e: BaseException):
         super().__init__("IoError", LineInfo(file, 1, 1), f'Unable to open file {file}. {e}')
 
-class SyntaxError(EoError):
+class EoSyntaxError(EoError):
     def __init__(self, lf: LineInfo, msg: str):
         super().__init__('SyntaxError', lf, msg)
 

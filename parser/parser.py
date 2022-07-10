@@ -1,3 +1,5 @@
+import eotypes
+from error.error import EoSyntaxError
 import parser.nodes.exprn as Expr
 from tokens import TType, Token
 
@@ -7,7 +9,7 @@ class Parser:
         self.tokens = tokens
         self.i = 0
     
-    def run(self):
+    def run(self) -> Expr:
         return self.expr()
     
 
@@ -56,14 +58,39 @@ class Parser:
         return expr
     
     def unary(self):
+        if self.match(TType.Not, TType.Minus):
+            op = self.prev()
+            right = self.unary()
+            return Expr.Unary(op, right)
         
+        return self.primary()
+    
+    def primary(self):
+        if self.match(TType.T_True): return Expr.Literal(eotypes.Bool(True))
+        if self.match(TType.T_False): return Expr.Literal(eotypes.Bool(False))
+        if self.match(TType.Nil): return Expr.Literal(eotypes.Nil())
+
+        if self.match(TType.Number, TType.String):
+            t = self.prev()
+            if t.ttype == TType.String:
+                return Expr.Literal(eotypes.String(t.data))
+            else:
+                return Expr.Literal(eotypes.Num(t.data))
+        
+        if self.match(TType.LeftParen):
+            expr = self.expr()
+            self.consume(TType.RightParen, "Expected ')' after grouping")
+            return Expr.Grouping(expr)
+
+        tok = self.peek()
+        raise EoSyntaxError(tok, f"Unexpected token '{tok.ttype}'")
 
 
     """ Utils """
     def match(self, *types: list[TType]):
         for type in types:
             if self.check(type):
-                self.advance()
+                self.next()
                 return True
             
         return False
@@ -72,6 +99,16 @@ class Parser:
         if (self.is_end()): return False
         return self.peek().ttype == type
     
+    def consume(self, token: TType, msg: str):
+        if self.check(token):
+            return self.next()
+        
+        # no sync-ing can be done
+        # a raise terminates the whole process straight to catch
+        raise EoSyntaxError(self.peek(), msg)
+    
+
+    """ Pos """
     def is_end(self):
         return self.peek().ttype == TType.EOF
 
@@ -80,3 +117,8 @@ class Parser:
     
     def prev(self):
         return self.tokens[self.i - 1]
+    
+    def next(self):
+        if not self.is_end():
+            self.i += 1
+        return self.prev()

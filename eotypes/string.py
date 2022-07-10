@@ -5,4 +5,5 @@ class String(Type):
         super().__init__(val)
     
     def to_string(self):
-        return f'''"{self.val.replace('"', '\\"')}"'''
+        v = self.val.replace('"', '\\"')
+        return f'"{v}"'

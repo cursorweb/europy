@@ -1,5 +1,5 @@
 from error.lf import LineInfo
-from error import SyntaxError
+from error import EoSyntaxError
 from tokens import Token, TType
 
 
@@ -150,7 +150,7 @@ class Lexer:
                                 n = int(esc, 8)
                                 string += chr(n)
                             except:
-                                raise SyntaxError(
+                                raise EoSyntaxError(
                                     f"Invalid string escape '\\o{esc}'")
                         elif c == 'x':
                             esc = self.read_n(2)
@@ -158,7 +158,7 @@ class Lexer:
                                 n = int(esc, 16)
                                 string += chr(n)
                             except:
-                                raise SyntaxError(
+                                raise EoSyntaxError(
                                     f"Invalid string escape '\\x{esc}'")
                         elif c == 'u':
                             esc = self.read_n(4)
@@ -166,7 +166,7 @@ class Lexer:
                                 n = int(esc, 16)
                                 string += chr(n)
                             except:
-                                raise SyntaxError(
+                                raise EoSyntaxError(
                                     f"Invalid string escape '\\u{esc}'")
                         elif c == 'U':
                             esc = self.read_n(8)
@@ -174,14 +174,14 @@ class Lexer:
                                 n = int(esc, 16)
                                 string += chr(n)
                             except:
-                                raise SyntaxError(
+                                raise EoSyntaxError(
                                     f"Invalid string escape '\\U{esc}'")
                     else:
                         string += self.peek()
                         self.next()
 
                 if not self.is_valid():
-                    raise SyntaxError(self.lf, "Unterminated string")
+                    raise EoSyntaxError(self.lf, "Unterminated string")
 
                 self.next()  # "
                 self.append_token(TType.String, string)
@@ -233,7 +233,7 @@ class Lexer:
                         self.next()
 
                     if not self.is_valid():
-                        raise SyntaxError("Unterminated multiline comment")
+                        raise EoSyntaxError("Unterminated multiline comment")
 
                     self.next()  # *
                     self.next()  # /
@@ -274,7 +274,7 @@ class Lexer:
                         
                     self.append_token(TType.Number, float(num))
                 else:
-                    raise SyntaxError(self.lf, f"Unexpected token '{char}'")
+                    raise EoSyntaxError(self.lf, f"Unexpected token '{char}'")
 
             self.next()
 
@@ -309,7 +309,7 @@ class Lexer:
     """ Peeking """
 
     def peek(self, n=1):
-        if not self.is_valid():
+        if not self.is_valid() or self.i + n >= self.lenc:
             return '\0'
         return self.code[self.i + n]
 
