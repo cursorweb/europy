@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 from eotypes.type import Type
-from parser.nodes.stmt import Stmt
+from parser.nodes.stmtn import Stmt
 from tokens import Token
 
 

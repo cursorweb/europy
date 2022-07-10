@@ -176,9 +176,9 @@ class Lexer:
                             except:
                                 raise SyntaxError(
                                     f"Invalid string escape '\\U{esc}'")
-                        else:
-                            string += self.peek()
-                            self.next()
+                    else:
+                        string += self.peek()
+                        self.next()
 
                 if not self.is_valid():
                     raise SyntaxError(self.lf, "Unterminated string")
