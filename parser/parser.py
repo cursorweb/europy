@@ -1,6 +1,6 @@
 import eotypes
 from error.error import EoSyntaxError
-import parser.nodes.exprn as Expr
+import parser.nodes.expr.node as Expr
 from tokens import TType, Token
 
 

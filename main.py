@@ -1,7 +1,7 @@
 from lexer import Lexer
 from parser import Parser
 from interpreter import Interpreter
-from parser.nodes.exprn import *
+from parser.nodes import *
 from tokens import TType
 
 from error import EoError
