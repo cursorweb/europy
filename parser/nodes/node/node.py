@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import Literal
 from ..expr.base import Expr
 from .base import StmtVisitor
 
@@ -56,3 +57,54 @@ class IfStmt(Stmt):
 
     def visit(self, v: StmtVisitor):
         return v.if_stmt(self)
+
+
+class WhileStmt(Stmt):
+    def __init__(self, cond: Expr, loop: list[Stmt]):
+        self.cond = cond
+        self.loop = loop
+    
+    def visit(self, v: StmtVisitor):
+        return v.while_stmt(self)
+
+
+
+class LoopFlow(Stmt):
+    def __init__(self, type: Literal['break', 'continue']):
+        self.type = type
+    
+    def visit(self, v: StmtVisitor):
+        return v.loop_flow(self)
+
+
+
+class RetStmt(Stmt):
+    def __init__(self, val: Expr = None):
+        self.val = val
+    
+    def visit(self, v: StmtVisitor):
+        return v.ret_stmt(self)
+
+
+
+class Function(Stmt):
+    def __init__(self, name: Token, args: list[Token], opt_args: list[(Token, Expr)], block: list[Stmt]):
+        self.name = name
+        self.args = args
+        self.opt_args = opt_args
+        self.block = block
+    
+    def visit(self, v: StmtVisitor):
+        return v.function(self)
+
+
+
+# todo heeheh!
+'''
+class UseStmt(Stmt):
+    def __init__(self, name: Token, ):
+        self.
+    
+    def visit(self, v: StmtVisitor):
+        return v.(self)
+'''
