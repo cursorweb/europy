@@ -15,11 +15,22 @@ except EoError as e:
     e.display()
 
 parser = Parser(tokens)
+tree = None
 
 try:
     tree = parser.run()
 except EoError as e:
     e.display()
+
+interpreter = Interpreter(tree)
+res = None
+
+try:
+    res = interpreter.run()
+except EoError as e:
+    e.display()
+
+print(res.to_string())
 
 # quick debug
 class Printer(ExprVisitor):
@@ -82,4 +93,4 @@ class Printer(ExprVisitor):
     def range(self, e: 'Range'): pass
 
 
-print(Printer(tree).run())
+# print(Printer(tree).run())

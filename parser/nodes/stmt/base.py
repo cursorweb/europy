@@ -30,3 +30,9 @@ class StmtVisitor(ABC):
 
     @abstractmethod
     def use_stmt(self, e): pass
+
+
+
+class Stmt(ABC):
+    @abstractmethod
+    def visit(self, v: StmtVisitor): pass

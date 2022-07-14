@@ -1,6 +1,6 @@
 from eotypes.type import Type
 from .base import Expr
-from ..node.node import Stmt
+from ..stmt.node import Stmt
 from tokens import Token
 
 
