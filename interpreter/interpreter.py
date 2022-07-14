@@ -66,3 +66,10 @@ class Interpreter(ExprVisitor):
     def map(self, e: 'Map'): pass
     
     def range(self, e: 'Range'): pass
+
+
+    """ Util """
+    def is_truthy(val: Type):
+        if val.val == None: return False
+        if val.tname == 'bool': return val.val
+        return True

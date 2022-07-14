@@ -1,8 +1,7 @@
 from lexer import Lexer
 from parser import Parser
 from interpreter import Interpreter
-from parser.nodes import *
-from tokens import TType
+from parser.nodes import * # hack
 
 from error import EoError
 
