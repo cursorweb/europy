@@ -88,13 +88,38 @@ class Function(Stmt):
     def visit(self, v: StmtVisitor):
         return v.function(self)
 
-
-# todo heeheh!
-'''
 class UseStmt(Stmt):
-    def __init__(self, name: Token, ):
-        self.
+    class ImportType:
+        def __init__(self):
+            # empty = use io;
+            # mult = use io.{println, print, readln};
+            self.mods: list[Token] = []
+            # all = use io.*;
+            self.all = False
+
+        @classmethod
+        def mod(cls):
+            """ `use io;` """
+            return cls()
+        
+        @classmethod
+        def star(cls):
+            """ `use io.*;` """
+            out = cls()
+            out.all = True
+            return out
+
+        @classmethod
+        def mult(cls, names: list[Token]):
+            """ `use io.{println, print};` """
+            out = cls()
+            out.mods = names
+            return out
+
+    
+    def __init__(self, name: Token, imp_type: ImportType):
+        self.name = name
+        self.imp_type = imp_type
     
     def visit(self, v: StmtVisitor):
-        return v.(self)
-'''
+        return v.use_stmt(self)

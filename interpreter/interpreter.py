@@ -7,7 +7,7 @@ from parser.nodes.expr.node import *
 from parser.nodes.stmt.node import *
 
 
-class Interpreter(ExprVisitor):
+class Interpreter(ExprVisitor, StmtVisitor):
     def __init__(self, tree: Expr): # expr for now
         self.trees = tree
     
@@ -21,51 +21,67 @@ class Interpreter(ExprVisitor):
     
 
     """ Stmt """
+    def expr_stmt(self, e: ExprStmt): pass
+    
+    def var_decl(self, e: VarDecl): pass
+    
+    def block(self, e: Block): pass
 
+    def if_stmt(self, e: IfStmt): pass
+
+    def while_stmt(self, e: WhileStmt): pass
+
+    def loop_flow(self, e: LoopFlow): pass
+    
+    def ret_stmt(self, e: RetStmt): pass
+
+    def function(self, e: Function): pass
+
+    def use_stmt(self, e: UseStmt): pass
 
 
     """ Expr """
-    def assign(self, e: 'Assign'): pass
+    def assign(self, e: Assign): pass
 
-    def binary(self, e: 'Binary'):
+    def binary(self, e: Binary):
         left = self.eval_expr(e.left)
         right = self.eval_expr(e.right)
 
         return left.binary(e.op, right)
 
-    def grouping(self, e: 'Grouping'):
+    def grouping(self, e: Grouping):
         return self.eval_expr(e.expr)
     
-    def literal(self, e: 'Literal'):
+    def literal(self, e: Literal):
         return e.val
     
-    def unary(self, e: 'Unary'):
+    def unary(self, e: Unary):
         right = self.eval_expr(e.expr)
         return right.unary(e.op)
 
-    def variable(self, e: 'Variable'): pass
+    def variable(self, e: Variable): pass
 
-    def block(self, e: 'Block'): pass
+    def block(self, e: Block): pass
 
-    def logical(self, e: 'Logical'): pass
+    def logical(self, e: Logical): pass
 
-    def ternary(self, e: 'Ternary'): pass
+    def ternary(self, e: Ternary): pass
 
-    def call(self, e: 'Call'): pass
+    def call(self, e: Call): pass
 
-    def if_expr(self, e: 'IfExpr'): pass
+    def if_expr(self, e: IfExpr): pass
 
-    def get(self, e: 'Get'): pass
+    def get(self, e: Get): pass
 
-    def set(self, e: 'Set'): pass
+    def set(self, e: Set): pass
 
-    def prop(self, e: 'Prop'): pass
+    def prop(self, e: Prop): pass
 
-    def array(self, e: 'Array'): pass
+    def array(self, e: Array): pass
 
-    def map(self, e: 'Map'): pass
+    def map(self, e: Map): pass
     
-    def range(self, e: 'Range'): pass
+    def range(self, e: Range): pass
 
 
     """ Util """

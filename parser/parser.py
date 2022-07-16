@@ -1,6 +1,12 @@
 import eotypes
 from error.error import EoSyntaxError
+
+from parser.nodes.expr.base import Expr as ExprT
 import parser.nodes.expr.node as Expr
+
+from parser.nodes.stmt.base import Stmt as StmtT
+import parser.nodes.stmt.node as Stmt
+
 from tokens import TType, Token
 
 
@@ -10,14 +16,35 @@ class Parser:
         self.i = 0
     
     def run(self) -> Expr:
-        return self.expr()
+        stmts = []
+
+        while not self.is_end():
+            stmts.append(self.stmt())
+        
+        return stmts
     
 
-    """ AST """
-    def expr(self):
+    """ - AST - """
+    """ Stmt """
+    def stmt(self) -> StmtT:
+        return self.expr_stmt()
+    
+    def expr_stmt(self) -> StmtT:
+        expr = self.expr()
+
+        if not self.match(TType.Semi):
+            semi = self.peek()
+            if semi.ttype != TType.RightBrace: # semi.ttype != TType.eof ??
+                raise EoSyntaxError(semi.lf, "Expected ';' after statement.")
+        
+        return expr
+
+
+    """ Expr """
+    def expr(self) -> ExprT:
         return self.equality()
     
-    def equality(self):
+    def equality(self) -> ExprT:
         expr = self.comp()
 
         while self.match(TType.NotEq, TType.EqEq):
@@ -27,7 +54,7 @@ class Parser:
         
         return expr
     
-    def comp(self):
+    def comp(self) -> ExprT:
         expr = self.add()
 
         while self.match(TType.Less, TType.LessEq, TType.Greater, TType.GreaterEq):
@@ -37,7 +64,7 @@ class Parser:
         
         return expr
     
-    def add(self):
+    def add(self) -> ExprT:
         expr = self.mult()
 
         while self.match(TType.Plus, TType.Minus):
@@ -47,7 +74,7 @@ class Parser:
         
         return expr
     
-    def mult(self):
+    def mult(self) -> ExprT:
         expr = self.unary()
 
         while self.match(TType.Times, TType.Divide, TType.Mod):
@@ -57,7 +84,7 @@ class Parser:
         
         return expr
     
-    def unary(self):
+    def unary(self) -> ExprT:
         if self.match(TType.Not, TType.Minus):
             op = self.prev()
             right = self.unary()
@@ -65,7 +92,7 @@ class Parser:
         
         return self.primary()
     
-    def primary(self):
+    def primary(self) -> ExprT:
         if self.match(TType.T_True): return Expr.Literal(eotypes.Bool(True))
         if self.match(TType.T_False): return Expr.Literal(eotypes.Bool(False))
         if self.match(TType.Nil): return Expr.Literal(eotypes.Nil())
@@ -109,16 +136,16 @@ class Parser:
     
 
     """ Pos """
-    def is_end(self):
+    def is_end(self) -> ExprT:
         return self.peek().ttype == TType.EOF
 
     def peek(self, n = 0):
         return self.tokens[self.i + n]
     
-    def prev(self):
+    def prev(self) -> ExprT:
         return self.tokens[self.i - 1]
     
-    def next(self):
+    def next(self) -> ExprT:
         if not self.is_end():
             self.i += 1
         return self.prev()
