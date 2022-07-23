@@ -27,14 +27,66 @@ class Parser:
     """ - AST - """
     """ Stmt """
     def stmt(self) -> StmtT:
+        if self.match(TType.If):
+            pass
+        
+        if self.match(TType.Var):
+            return self.var_decl()
+        
+        if self.match(TType.While):
+            pass
+
+        if self.match(TType.Do):
+            pass
+
+        if self.match(TType.LeftBrace):
+            pass
+        
+        if self.match(TType.Break, TType.Continue, TType.Return):
+            pass
+
+        if self.match(TType.Fn):
+            pass
+            
+        if self.match(TType.Use):
+            pass
+
         return self.expr_stmt()
+    
+    def var_decl(self) -> StmtT:
+        vars = []
+
+        while True:
+            name = self.next()
+            if name.ttype == TType.Identifier:
+                val = None
+
+                if self.match(TType.Eq):
+                    val = self.expr()
+                else:
+                    Expr.Literal(eotypes.Nil())
+            
+                vars.append((name, val))
+
+                if self.next().ttype == TType.Semi:
+                    break
+                elif self.next().ttype == TType.Comma:
+                    continue
+                else:
+                    raise EoSyntaxError(self.prev().lf, "Expected ',' or ';' after variable declaration.")
+            else:
+                raise EoSyntaxError(self.prev().lf, "Expected variable name.")
+        
+        return Stmt.VarDecl(vars)
+
     
     def expr_stmt(self) -> StmtT:
         expr = self.expr()
 
         if not self.match(TType.Semi):
             semi = self.peek()
-            if semi.ttype != TType.RightBrace: # semi.ttype != TType.eof ??
+            # feature: last statement doesn't need semi (repl purposes probably)
+            if semi.ttype != TType.RightBrace and semi.ttype != TType.EOF:
                 raise EoSyntaxError(semi.lf, "Expected ';' after statement.")
         
         return expr
@@ -136,16 +188,16 @@ class Parser:
     
 
     """ Pos """
-    def is_end(self) -> ExprT:
+    def is_end(self):
         return self.peek().ttype == TType.EOF
 
     def peek(self, n = 0):
         return self.tokens[self.i + n]
     
-    def prev(self) -> ExprT:
+    def prev(self):
         return self.tokens[self.i - 1]
     
-    def next(self) -> ExprT:
+    def next(self):
         if not self.is_end():
             self.i += 1
         return self.prev()

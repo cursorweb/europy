@@ -21,7 +21,8 @@ class Interpreter(ExprVisitor, StmtVisitor):
     
 
     """ Stmt """
-    def expr_stmt(self, e: ExprStmt): pass
+    def expr_stmt(self, e: ExprStmt):
+        return self.eval_expr(e.expr)
     
     def var_decl(self, e: VarDecl): pass
     
