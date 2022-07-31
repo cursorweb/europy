@@ -28,22 +28,22 @@ class Parser:
     """ Stmt """
     def stmt(self) -> StmtT:
         if self.match(TType.If):
-            pass
+            return self.if_stmt()
         
         if self.match(TType.Var):
             return self.var_decl()
         
         if self.match(TType.While):
-            pass
+            return self.while_stmt()
 
         if self.match(TType.Do):
-            pass
+            return self.dowhile_stmt()
 
         if self.match(TType.LeftBrace):
-            pass
-        
+            return Stmt.Block(self.block())
+
         if self.match(TType.Break, TType.Continue, TType.Return):
-            pass
+            return self.controlflow_stmt()
 
         if self.match(TType.Fn):
             pass
@@ -52,6 +52,27 @@ class Parser:
             pass
 
         return self.expr_stmt()
+    
+    def if_stmt(self) -> StmtT:
+        cond = self.expr()
+        self.consume(TType.LeftBrace, "Expected '{' after if statement condition.")
+        true_br = self.block()
+        elif_brs = []
+        else_br = None
+
+        if self.match(TType.Elif):
+            while True:
+                elif_cond = self.expr()
+                self.consume(TType.LeftBrace, "Expected '{' after elif statement condition.")
+                elif_brs.append((elif_cond, self.block()))
+                if self.match(TType.Elif):
+                    break
+        
+        if self.match(TType.Else):
+            self.consume(TType.LeftBrace, "Expected '{' after else keyword.")
+            else_br = self.block()
+        
+        return Stmt.IfStmt(cond, true_br, elif_brs, else_br)
     
     def var_decl(self) -> StmtT:
         vars = []
@@ -78,8 +99,46 @@ class Parser:
                 raise EoSyntaxError(self.prev().lf, "Expected variable name.")
         
         return Stmt.VarDecl(vars)
-
     
+    def while_stmt(self) -> StmtT:
+        cond = self.expr()
+        self.consume(TType.LeftBrace, "Expected '{' after while loop condition.")
+        body = self.block()
+
+        Stmt.WhileStmt(cond, body)
+    
+    def dowhile_stmt(self) -> StmtT:
+        self.consume(TType.LeftBrace, "Expected '{' after do keyword.")
+        body = self.block()
+        self.consume(TType.While, "Expected 'while' after do loop body.")
+        cond = self.expr()
+        self.consume(TType.Semi, "Expected ';' after do while loop condition.")
+
+        return Stmt.Block([Stmt.Block(body), Stmt.WhileStmt(cond, body)])
+    
+    def block(self) -> list[StmtT]:
+        stmts = []
+
+        while not self.match(TType.RightBrace) and not self.is_end():
+            stmts.append(self.stmt())
+        
+        self.consume(TType.RightBrace, "Expected '}' after block expression.")
+
+        return stmts
+    
+    def controlflow_stmt(self) -> StmtT:
+        tok = self.prev()
+
+        if tok.ttype == TType.Break:
+            return Stmt.LoopFlow('break')
+        elif tok.ttype == TType.Continue:
+            return Stmt.LoopFlow('continue')
+        elif tok.ttype == TType.Return:
+            val = None
+            if self.get(TType.Semi):
+                val = self.expr()
+            return Stmt.RetStmt(val)
+
     def expr_stmt(self) -> StmtT:
         expr = self.expr()
 
