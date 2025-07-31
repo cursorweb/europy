@@ -2,6 +2,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from tokens import Token
+    from eotypes import Type
 from .lf import LineInfo
 
 
@@ -35,5 +36,17 @@ class EoSyntaxError(EoError):
 
 
 class EoTypeError(EoError):
-    def __init__(self, lf: "Token", msg: str):
-        super().__init__("TypeError", lf.lf, msg)
+    def __init__(self, lf: "LineInfo", msg: str):
+        super().__init__("TypeError", lf, msg)
+
+
+class EoTypeErrorResult(BaseException):
+    """Raise a type error that gets promoted to a EoTypeError"""
+
+    def __init__(self, *types: "Type"):
+        self.types = map(lambda t: t.tname, types)
+
+    def with_lf(self, op: "Token"):
+        return EoTypeError(
+            op.lf, f"Operator '{op.ttype}' can't be applied to {', '.join(self.types)}"
+        )

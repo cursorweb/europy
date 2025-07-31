@@ -68,6 +68,7 @@ class Lexer:
         while self.is_valid():
             char = self.code[self.i]
 
+            # todo: use match
             if char == "{":
                 if self.match("{"):
                     self.append_token(TType.LeftBBrace)

@@ -16,7 +16,7 @@ class StmtVisitor(ABC):
         pass
 
     @abstractmethod
-    def block_stmt(self, e):
+    def block_stmt(self, e: "BlockStmt"):
         pass
 
     @abstractmethod

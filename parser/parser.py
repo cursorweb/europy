@@ -61,15 +61,12 @@ class Parser:
         elif_brs: list[tuple[ExprT, list[StmtT]]] = []
         else_br = None
 
-        if self.match(TType.Elif):
-            while True:
-                elif_cond = self.expr()
-                self.consume(
-                    TType.LeftBrace, "Expected '{' after elif statement condition."
-                )
-                elif_brs.append((elif_cond, self.block()))
-                if self.match(TType.Elif):
-                    break
+        while self.match(TType.Elif):
+            elif_cond = self.expr()
+            self.consume(
+                TType.LeftBrace, "Expected '{' after elif statement condition."
+            )
+            elif_brs.append((elif_cond, self.block()))
 
         if self.match(TType.Else):
             self.consume(TType.LeftBrace, "Expected '{' after else keyword.")

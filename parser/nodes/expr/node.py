@@ -99,13 +99,13 @@ class IfExpr(Expr):
     def __init__(
         self,
         cond: Expr,
-        block: list[Stmt],
-        elsifs: list[tuple[Expr, list[Stmt]]],
+        if_true: list[Stmt],
+        elifs: list[tuple[Expr, list[Stmt]]],
         els: list[Stmt] | None = None,
     ):
         self.cond = cond
-        self.block = block
-        self.elsifs = elsifs
+        self.if_true = if_true
+        self.elifs = elifs
         self.els = els
 
     def visit(self, v):

@@ -31,6 +31,9 @@ for tree in trees:
 interpreter = Interpreter(trees)
 
 try:
+    # dbg:
+    print(interpreter.eval_expr(trees[0].expr).to_string())  # type: ignore
+    #:dbg
     interpreter.run()
 except EoError as e:
     e.display()

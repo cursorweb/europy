@@ -1,5 +1,6 @@
+from typing import cast
+
 from parser.nodes import *
-from parser.nodes.stmt.base import StmtVisitor
 
 TAB = "    "
 
@@ -30,8 +31,13 @@ class Printer(ExprVisitor, StmtVisitor):
             out.append(f"{decl[0]} = {decl[1].visit(self)}")
         return f"var {', '.join(out)};"
 
-    def if_stmt(self, e):
-        pass
+    def if_stmt(self, e: "IfStmt"):
+        out = f"if {self.eval_expr(e.cond)} {self.print_block(e.if_true)}"
+        for cond, if_true in e.elifs:
+            out += f" elif {self.eval_expr(cond)} {self.print_block(if_true)}"
+        if e.els:
+            out += f" else {self.print_block(e.els)}"
+        return out
 
     def while_stmt(self, e):
         pass
@@ -49,14 +55,7 @@ class Printer(ExprVisitor, StmtVisitor):
         pass
 
     def block_stmt(self, e):
-        self.indent += 1
-        out = ""
-        for stmt in e.stmts:
-            out += self.eval_stmt(stmt)
-        self.indent -= 1
-
-        t = TAB * self.indent
-        return f"{{\n{out}\n{t}}}"
+        return self.print_block(e.stmts)
 
     """ expr """
 
@@ -79,14 +78,7 @@ class Printer(ExprVisitor, StmtVisitor):
         return f"{e.name.data}"
 
     def block_expr(self, e: "BlockExpr"):
-        self.indent += 1
-        out = ""
-        for stmt in e.stmts:
-            out += self.eval_stmt(stmt)
-        self.indent -= 1
-
-        t = "\t" * self.indent
-        return f"{{\n{out}\n{t}}}"
+        return self.print_block(e.stmts)
 
     def logical(self, e: "Logical"):
         return f"{self.eval_expr(e.left)} {e.op.ttype.value} {self.eval_expr(e.right)}"
@@ -99,8 +91,7 @@ class Printer(ExprVisitor, StmtVisitor):
         # return f"{self.eval(e.func)}({', '.join(map(self.eval, e.args))})"
 
     def if_expr(self, e: "IfExpr"):
-        return ""
-        # return f"if {self.eval(e.cond)} {{ {self.eval(e.block)} }} {elsifs if e.elsifs else ''}{els if e.els else ''}"
+        return self.if_stmt(cast(IfStmt, e))
 
     def get(self, e: "Get"):
         pass
@@ -119,3 +110,13 @@ class Printer(ExprVisitor, StmtVisitor):
 
     def range(self, e: "Range"):
         pass
+
+    def print_block(self, stmts: list[Stmt]):
+        self.indent += 1
+        out = ""
+        for stmt in stmts:
+            out += self.eval_stmt(stmt)
+        self.indent -= 1
+
+        t = TAB * self.indent
+        return f"{{\n{out}\n{t}}}"

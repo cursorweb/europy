@@ -1,5 +1,5 @@
 from typing import Any
-from error.error import EoTypeError
+from error.error import EoTypeErrorResult
 from tokens import Token
 from abc import ABC
 
@@ -15,13 +15,48 @@ class Type(ABC):
     def to_string(self):
         return str(self.val)
 
-    def binary(self, op: Token, right: "Type") -> "Type":
-        raise EoTypeError(
-            op,
-            f"Operator '{op.ttype}' can't be used with type {self.tname} and {right.tname}",
-        )
+    def plus(self, right: "Type") -> "Type":
+        raise EoTypeErrorResult(self, right)
 
-    def unary(self, op: Token) -> "Type":
-        raise EoTypeError(
-            op, f"Operator '{op.ttype}' can't be applied to type {self.tname}"
-        )
+    def minus(self, right: "Type") -> "Type":
+        raise EoTypeErrorResult(self, right)
+
+    def times(self, right: "Type") -> "Type":
+        raise EoTypeErrorResult(self, right)
+
+    def divide(self, right: "Type") -> "Type":
+        raise EoTypeErrorResult(self, right)
+
+    def mod(self, right: "Type") -> "Type":
+        raise EoTypeErrorResult(self, right)
+
+    def pow(self, right: "Type") -> "Type":
+        raise EoTypeErrorResult(self, right)
+
+    def equals(self, right: "Type") -> "Type":
+        return Bool(self.tname == right.tname and self.val == right.val)
+
+    def grtr(self, right: "Type") -> "Type":
+        raise EoTypeErrorResult(self, right)
+
+    def less(self, right: "Type") -> "Type":
+        raise EoTypeErrorResult(self, right)
+
+    def negate(self) -> "Type":
+        raise EoTypeErrorResult(self)
+
+    def not_op(self) -> "Type":
+        raise EoTypeErrorResult(self)
+
+
+class Bool(Type):
+    val: bool
+
+    def __init__(self, val: bool):
+        super().__init__(val, "bool")
+
+    def not_op(self) -> "Type":
+        return Bool(not self.val)
+
+    def to_string(self):
+        return "true" if self.val else "false"
