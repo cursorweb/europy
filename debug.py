@@ -89,7 +89,7 @@ class Printer(ExprVisitor, StmtVisitor):
         return f"{{\n{out}\n{t}}}"
 
     def logical(self, e: "Logical"):
-        return f"{self.eval_expr(e.left)} {e.op.ttype} {self.eval_expr(e.right)}"
+        return f"{self.eval_expr(e.left)} {e.op.ttype.value} {self.eval_expr(e.right)}"
 
     def ternary(self, e: "Ternary"):
         return f"{self.eval_expr(e.cond)} ? {self.eval_expr(e.if_true)} : {self.eval_expr(e.if_false)}"

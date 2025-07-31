@@ -1,13 +1,16 @@
 from parser.nodes.expr.base import Expr, ExprVisitor
+from parser.nodes.expr.node import Ternary
 from parser.nodes.stmt.base import Stmt, StmtVisitor
 
-from eotypes import Type
+from tokens import TType
+
+from eotypes import *
 
 from parser.nodes.expr.node import *
 from parser.nodes.stmt.node import *
 
 
-class Interpreter(ExprVisitor, StmtVisitor):
+class Interpreter(ExprVisitor[Type], StmtVisitor):
     def __init__(self, tree: list[Stmt]):  # expr for now
         self.trees = tree
 
@@ -77,10 +80,24 @@ class Interpreter(ExprVisitor, StmtVisitor):
         pass
 
     def block_expr(self, e: BlockExpr):
-        pass
+        out: Type = Nil()
+        for stmt in e.stmts:
+            if isinstance(stmt, ExprStmt):
+                out = self.eval_expr(stmt.expr)
+
+        return out
 
     def logical(self, e: Logical):
-        pass
+        lval = self.eval_expr(e.left)
+
+        if e.op.ttype == TType.Or:
+            if self.is_truthy(lval):
+                return lval
+        else:  # and
+            if not self.is_truthy(lval):
+                return lval
+
+        self.eval_expr(e.right)
 
     def ternary(self, e: Ternary):
         pass

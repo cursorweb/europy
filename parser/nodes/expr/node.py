@@ -56,7 +56,6 @@ class Variable(Expr):
         return v.variable(self)
 
 
-# todo remove one of these LMAO
 class BlockExpr(Expr):
     def __init__(self, stmts: list[Stmt]):
         self.stmts = stmts
@@ -65,10 +64,8 @@ class BlockExpr(Expr):
         return v.block_expr(self)
 
 
-# and/or
-
-
 class Logical(Expr):
+    # and/or
     def __init__(self, l: Expr, op: Token, r: Expr):
         self.left = l
         self.op = op

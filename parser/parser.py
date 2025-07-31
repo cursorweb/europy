@@ -11,6 +11,7 @@ from tokens import TType, Token
 
 
 class Parser:
+    # todo: add sync
     def __init__(self, tokens: list[Token]):
         self.tokens = tokens
         self.i = 0
@@ -28,7 +29,7 @@ class Parser:
 
     def stmt(self) -> StmtT:
         if self.match(TType.If):
-            return self.if_stmt()
+            return Stmt.IfStmt(*self.if_stmt())
 
         if self.match(TType.Var):
             return self.var_decl()
@@ -53,11 +54,11 @@ class Parser:
 
         return self.expr_stmt()
 
-    def if_stmt(self) -> StmtT:
+    def if_stmt(self):
         cond = self.expr()
         self.consume(TType.LeftBrace, "Expected '{' after if statement condition.")
         true_br = self.block()
-        elif_brs = []
+        elif_brs: list[tuple[ExprT, list[StmtT]]] = []
         else_br = None
 
         if self.match(TType.Elif):
@@ -74,7 +75,7 @@ class Parser:
             self.consume(TType.LeftBrace, "Expected '{' after else keyword.")
             else_br = self.block()
 
-        return Stmt.IfStmt(cond, true_br, elif_brs, else_br)
+        return (cond, true_br, elif_brs, else_br)
 
     def var_decl(self) -> StmtT:
         vars: list[tuple[str, ExprT]] = []
@@ -160,7 +161,25 @@ class Parser:
     """ Expr """
 
     def expr(self) -> ExprT:
-        return self.equality()
+        return self.logic_or()
+
+    def logic_or(self) -> ExprT:
+        expr = self.logic_and()
+        while self.match(TType.Or):
+            tok = self.prev()
+            right = self.logic_and()
+            expr = Expr.Logical(expr, tok, right)
+
+        return expr
+
+    def logic_and(self) -> ExprT:
+        expr = self.equality()
+        while self.match(TType.And):
+            tok = self.prev()
+            right = self.equality()
+            expr = Expr.Logical(expr, tok, right)
+
+        return expr
 
     def equality(self) -> ExprT:
         expr = self.comp()
@@ -217,6 +236,9 @@ class Parser:
             return Expr.LiteralVal(eotypes.Bool(False))
         if self.match(TType.Nil):
             return Expr.LiteralVal(eotypes.Nil())
+
+        if self.match(TType.If):
+            return Expr.IfExpr(*self.if_stmt())
 
         if self.match(TType.Number, TType.String):
             t = self.prev()
