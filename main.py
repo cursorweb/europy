@@ -32,7 +32,7 @@ interpreter = Interpreter(trees)
 
 try:
     # dbg:
-    print(interpreter.eval_expr(trees[0].expr).to_string())  # type: ignore
+    # print(interpreter.eval_expr(trees[0].expr).to_string())  # type: ignore
     #:dbg
     interpreter.run()
 except EoError as e:

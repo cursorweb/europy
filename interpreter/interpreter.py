@@ -42,6 +42,9 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
     def while_stmt(self, e: WhileStmt):
         pass
 
+    def for_stmt(self, e: ForStmt):
+        pass
+
     def loop_flow(self, e: LoopFlow):
         pass
 

@@ -40,6 +40,9 @@ class Printer(ExprVisitor, StmtVisitor):
         return out
 
     def while_stmt(self, e):
+        return f"while {self.eval_expr(e.cond)} {self.print_block(e.block)}"
+
+    def for_stmt(self, e):
         pass
 
     def loop_flow(self, e):

@@ -28,6 +28,10 @@ class StmtVisitor(ABC):
         pass
 
     @abstractmethod
+    def for_stmt(self, e: "ForStmt"):
+        pass
+
+    @abstractmethod
     # break and continue
     def loop_flow(self, e: "LoopFlow"):
         pass

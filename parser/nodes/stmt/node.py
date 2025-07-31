@@ -59,10 +59,20 @@ class IfStmt(Stmt):
 class WhileStmt(Stmt):
     def __init__(self, cond: Expr, loop: list[Stmt]):
         self.cond = cond
-        self.loop = loop
+        self.block = loop
 
     def visit(self, v: StmtVisitor):
         return v.while_stmt(self)
+
+
+class ForStmt(Stmt):
+    def __init__(self, name: str, iterator: Expr, block: list[Stmt]) -> None:
+        self.name = name
+        self.iter = iterator
+        self.block = block
+
+    def visit(self, v: StmtVisitor):
+        return v.for_stmt(self)
 
 
 class LoopFlow(Stmt):

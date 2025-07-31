@@ -40,6 +40,9 @@ class Parser:
         if self.match(TType.Do):
             return self.dowhile_stmt()
 
+        if self.match(TType.For):
+            return self.for_stmt()
+
         if self.match(TType.LeftBrace):
             return Stmt.BlockStmt(self.block())
 
@@ -104,9 +107,13 @@ class Parser:
         return Stmt.VarDecl(vars)
 
     def while_stmt(self) -> StmtT:
-        cond = self.expr()
-        self.consume(TType.LeftBrace, "Expected '{' after while loop condition.")
-        body = self.block()
+        if self.match(TType.LeftBrace):
+            cond = Expr.LiteralVal(eotypes.Bool(True))
+            body = self.block()
+        else:
+            cond = self.expr()
+            self.consume(TType.LeftBrace, "Expected '{' after while loop condition.")
+            body = self.block()
 
         return Stmt.WhileStmt(cond, body)
 
@@ -118,6 +125,14 @@ class Parser:
         self.consume(TType.Semi, "Expected ';' after do while loop condition.")
 
         return Stmt.BlockStmt([Stmt.BlockStmt(body), Stmt.WhileStmt(cond, body)])
+
+    def for_stmt(self) -> StmtT:
+        ident = self.consume(TType.Identifier, "Expected variable after 'for'.")
+        self.consume(TType.In, "Expected 'in' after variable name")
+        iterator = self.expr()
+        block = self.block()
+
+        return Stmt.ForStmt(ident.data, iterator, block)
 
     def block(self) -> list[StmtT]:
         stmts = []
