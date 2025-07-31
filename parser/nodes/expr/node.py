@@ -31,7 +31,7 @@ class Grouping(Expr):
         return v.grouping(self)
 
 
-class Literal(Expr):
+class LiteralVal(Expr):
     def __init__(self, val: Type):
         self.val = val
 
@@ -56,12 +56,14 @@ class Variable(Expr):
         return v.variable(self)
 
 
-class Block(Expr):
+# todo remove one of these LMAO
+class BlockExpr(Expr):
     def __init__(self, stmts: Stmt):
         self.stmts = stmts
 
     def visit(self, v):
-        return v.block(self)
+        return v.block_expr(self)
+
 
 # and/or
 
@@ -97,7 +99,13 @@ class Call(Expr):
 
 
 class IfExpr(Expr):
-    def __init__(self, cond: Expr, block: list[Stmt], elsifs: list[(Expr, list[Stmt])], els: list[Stmt] = None):
+    def __init__(
+        self,
+        cond: Expr,
+        block: list[Stmt],
+        elsifs: list[tuple[Expr, list[Stmt]]],
+        els: list[Stmt] | None = None,
+    ):
         self.cond = cond
         self.block = block
         self.elsifs = elsifs
@@ -129,6 +137,7 @@ class Set(Expr):
     def visit(self, v):
         return v.set(self)
 
+
 # <mod>.<func>
 
 
@@ -150,7 +159,7 @@ class Array(Expr):
 
 
 class Map(Expr):
-    def __init__(self, itms: list[(Expr, Expr)]):
+    def __init__(self, itms: list[tuple[Expr, Expr]]):
         self.itms = itms
 
     def visit(self, v):

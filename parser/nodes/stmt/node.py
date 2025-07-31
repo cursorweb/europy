@@ -27,23 +27,29 @@ class ExprStmt(Stmt):
 
 
 class VarDecl(Stmt):
-    def __init__(self, decls: list[(str, Expr)]):
+    def __init__(self, decls: list[tuple[str, Expr]]):
         self.decls = decls
 
     def visit(self, v: StmtVisitor):
         return v.var_decl(self)
 
 
-class Block(Stmt):
+class BlockStmt(Stmt):
     def __init__(self, stmts: list[Stmt]):
         self.stmts = stmts
 
     def visit(self, v: StmtVisitor):
-        return v.block(self)
+        return v.block_stmt(self)
 
 
 class IfStmt(Stmt):
-    def __init__(self, cond: Expr, if_true: list[Stmt], elifs: list[(Expr, list[Stmt])], els: list[Stmt] = None):
+    def __init__(
+        self,
+        cond: Expr,
+        if_true: list[Stmt],
+        elifs: list[tuple[Expr, list[Stmt]]],
+        els: list[Stmt] | None = None,
+    ):
         self.cond = cond
         self.if_true = if_true
         self.elifs = elifs
@@ -63,7 +69,7 @@ class WhileStmt(Stmt):
 
 
 class LoopFlow(Stmt):
-    def __init__(self, type: Literal['break', 'continue']):
+    def __init__(self, type: Literal["break", "continue"]):
         self.type = type
 
     def visit(self, v: StmtVisitor):
@@ -71,7 +77,7 @@ class LoopFlow(Stmt):
 
 
 class RetStmt(Stmt):
-    def __init__(self, val: Expr = None):
+    def __init__(self, val: Expr | None = None):
         self.val = val
 
     def visit(self, v: StmtVisitor):
@@ -79,7 +85,13 @@ class RetStmt(Stmt):
 
 
 class Function(Stmt):
-    def __init__(self, name: Token, args: list[Token], opt_args: list[(Token, Expr)], block: list[Stmt]):
+    def __init__(
+        self,
+        name: Token,
+        args: list[Token],
+        opt_args: list[tuple[Token, Expr]],
+        block: list[Stmt],
+    ):
         self.name = name
         self.args = args
         self.opt_args = opt_args
@@ -88,38 +100,40 @@ class Function(Stmt):
     def visit(self, v: StmtVisitor):
         return v.function(self)
 
+
 class UseStmt(Stmt):
     class ImportType:
+        mods: list[Token]
+
         def __init__(self):
             # empty = use io;
             # mult = use io.{println, print, readln};
-            self.mods: list[Token] = []
+            self.mods = []
             # all = use io.*;
             self.all = False
 
         @classmethod
         def mod(cls):
-            """ `use io;` """
+            """`use io;`"""
             return cls()
-        
+
         @classmethod
         def star(cls):
-            """ `use io.*;` """
+            """`use io.*;`"""
             out = cls()
             out.all = True
             return out
 
         @classmethod
         def mult(cls, names: list[Token]):
-            """ `use io.{println, print};` """
+            """`use io.{println, print};`"""
             out = cls()
             out.mods = names
             return out
 
-    
     def __init__(self, name: Token, imp_type: ImportType):
         self.name = name
         self.imp_type = imp_type
-    
+
     def visit(self, v: StmtVisitor):
         return v.use_stmt(self)

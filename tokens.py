@@ -1,92 +1,89 @@
 from typing import Any
+from enum import Enum
 
 from error.lf import LineInfo
 
 
-class TType:
-    """ Delimiters """
-    LeftBBrace = '{{'
-    RightBBrace = '}}'
+class TType(Enum):
+    """Delimiters"""
 
-    LeftBrace = '{'
-    RightBrace = '}'
+    LeftBBrace = "{{"
+    RightBBrace = "}}"
 
-    LeftParen = '('
-    RightParen = ')'
+    LeftBrace = "{"
+    RightBrace = "}"
 
-    LeftBrack = '['
-    RightBrack = ']'
+    LeftParen = "("
+    RightParen = ")"
 
-    Comma = ','
-    Dot = '.'
+    LeftBrack = "["
+    RightBrack = "]"
+
+    Comma = ","
+    Dot = "."
 
     # ranges
-    DotDot = '..'
-    DotEq = '.='
+    DotDot = ".."
+    DotEq = ".="
 
-    Semi = ';'
-
+    Semi = ";"
 
     """ Comparison """
-    Not = '!'
-    EqEq = '=='
-    NotEq = '!='
-    Greater = '>'
-    GreaterEq = '>='
-    Less = '<'
-    LessEq = '<='
-
+    Not = "!"
+    EqEq = "=="
+    NotEq = "!="
+    Greater = ">"
+    GreaterEq = ">="
+    Less = "<"
+    LessEq = "<="
 
     """ Assignment """
-    Eq = '='
-    PlusEq = '+='
-    MinusEq = '-='
-    TimesEq = '*='
-    DivideEq = '/='
-    PowEq = '**='
-    ModEq = '%='
-
+    Eq = "="
+    PlusEq = "+="
+    MinusEq = "-="
+    TimesEq = "*="
+    DivideEq = "/="
+    PowEq = "**="
+    ModEq = "%="
 
     """ Operators """
-    Plus = '+'
-    Minus = '-'
-    Times = '*'
-    Divide = '/'
-    Pow = '**'
-    Mod = '%'
+    Plus = "+"
+    Minus = "-"
+    Times = "*"
+    Divide = "/"
+    Pow = "**"
+    Mod = "%"
 
-    Colon = ':'
-    Question = '?'
-
+    Colon = ":"
+    Question = "?"
 
     """ Literals """
-    Identifier = 'Identifier'
-    String = 'String'
-    Number = 'Number'
-    T_True = 'true'
-    T_False = 'false'
-    Nil = 'nil'
-
+    Identifier = "Identifier"
+    String = "String"
+    Number = "Number"
+    T_True = "true"
+    T_False = "false"
+    Nil = "nil"
 
     """ Keywords """
-    Fn = 'fn'
-    Return = 'return'
-    Var = 'var'
-    Use = 'use'
-    Do = 'do'
-    While = 'while'
-    For = 'for'
-    In = 'in'
-    Break = 'break'
-    Continue = 'continue'
-    Or = 'or'
-    And = 'and'
-    If = 'if'
-    Else = 'else'
-    Elif = 'elif'
+    Fn = "fn"
+    Return = "return"
+    Var = "var"
+    Use = "use"
+    Do = "do"
+    While = "while"
+    For = "for"
+    In = "in"
+    Break = "break"
+    Continue = "continue"
+    Or = "or"
+    And = "and"
+    If = "if"
+    Else = "else"
+    Elif = "elif"
 
-    
-    EOF = 'eof'
+    EOF = "eof"
+
 
 class Token:
     ttype: TType
