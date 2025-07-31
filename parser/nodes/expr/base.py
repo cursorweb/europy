@@ -45,10 +45,6 @@ class ExprVisitor(ABC, Generic[T]):
         pass
 
     @abstractmethod
-    def ternary(self, e: "Ternary") -> T:
-        pass
-
-    @abstractmethod
     def call(self, e: "Call") -> T:
         pass
 

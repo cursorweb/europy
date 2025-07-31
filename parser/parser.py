@@ -158,7 +158,19 @@ class Parser:
     """ Expr """
 
     def expr(self) -> ExprT:
-        return self.logic_or()
+        return self.ternary()
+
+    def ternary(self) -> ExprT:
+        expr = self.logic_or()
+
+        if self.match(TType.Question):
+            if_true = self.expr()
+            self.consume(TType.Colon, "Expected ':' after ternary if then expression")
+            els = self.ternary()
+
+            expr = Expr.IfExpr(expr, [Stmt.ExprStmt(if_true)], [], [Stmt.ExprStmt(els)])
+
+        return expr
 
     def logic_or(self) -> ExprT:
         expr = self.logic_and()

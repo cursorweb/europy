@@ -75,16 +75,6 @@ class Logical(Expr):
         return v.logical(self)
 
 
-class Ternary(Expr):
-    def __init__(self, c: Expr, t: Expr, f: Expr):
-        self.cond = c
-        self.if_true = t
-        self.if_false = f
-
-    def visit(self, v):
-        return v.ternary(self)
-
-
 class Call(Expr):
     def __init__(self, func: Expr, paren: Token, args: list[Expr]):
         self.func = func

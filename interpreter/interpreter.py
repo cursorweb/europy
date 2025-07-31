@@ -1,5 +1,4 @@
 from parser.nodes.expr.base import Expr, ExprVisitor
-from parser.nodes.expr.node import Ternary
 from parser.nodes.stmt.base import Stmt, StmtVisitor
 
 from tokens import TType
@@ -126,9 +125,6 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
                 return lval
 
         self.eval_expr(e.right)
-
-    def ternary(self, e: Ternary):
-        pass
 
     def call(self, e: Call):
         pass
