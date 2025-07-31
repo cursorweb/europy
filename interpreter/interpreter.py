@@ -76,7 +76,7 @@ class Interpreter(ExprVisitor, StmtVisitor):
     def variable(self, e: Variable):
         pass
 
-    def block_expr(self, e: BlockStmt):
+    def block_expr(self, e: BlockExpr):
         pass
 
     def logical(self, e: Logical):

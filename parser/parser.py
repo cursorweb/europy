@@ -91,9 +91,9 @@ class Parser:
 
                 vars.append((name.data, val))
 
-                if self.next().ttype == TType.Semi:
+                if self.match(TType.Semi):
                     break
-                elif self.next().ttype == TType.Comma:
+                elif self.match(TType.Comma):
                     continue
                 else:
                     raise EoSyntaxError(
@@ -124,7 +124,7 @@ class Parser:
     def block(self) -> list[StmtT]:
         stmts = []
 
-        while not self.match(TType.RightBrace) and not self.is_end():
+        while not self.check(TType.RightBrace) and not self.is_end():
             stmts.append(self.stmt())
 
         self.consume(TType.RightBrace, "Expected '}' after block expression.")
@@ -230,6 +230,10 @@ class Parser:
             self.consume(TType.RightParen, "Expected ')' after grouping")
             return Expr.Grouping(expr)
 
+        if self.match(TType.LeftBrace):
+            stmts = self.block()
+            return Expr.BlockExpr(stmts)
+
         tok = self.peek()
         raise EoSyntaxError(tok.lf, f"Unexpected token '{tok.ttype}'")
 
@@ -244,6 +248,7 @@ class Parser:
         return False
 
     def match(self, *types: TType):
+        """if it matches, consume it, otherwise do nothing"""
         for type in types:
             if self.check(type):
                 self.next()
@@ -252,6 +257,7 @@ class Parser:
         return False
 
     def check(self, type: TType):
+        """Check if the current (unconsumed) token is the ttype we want"""
         if self.is_end():
             return False
         return self.peek().ttype == type

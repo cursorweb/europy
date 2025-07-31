@@ -5,7 +5,7 @@ program => statement* EOF
 statement => exprStmt | varDecl | block | ifStmt | whileStmt | doWhileStmt | breakStmt | continueStmt | fnDecl | returnStmt | useStmt
 
 exprStmt => ( expr ";" )
-varDecl => "var" IDENTIFIER ("=" expr )? ";"
+varDecl => "var" IDENTIFIER ("=" expr )? ( "," IDENTIFIER ("=" expr )? )* ";"
 
 ifStmt => "if" expr block ( "elif" expr block )* ( "else" block )?
 

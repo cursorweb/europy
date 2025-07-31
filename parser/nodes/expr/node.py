@@ -58,7 +58,7 @@ class Variable(Expr):
 
 # todo remove one of these LMAO
 class BlockExpr(Expr):
-    def __init__(self, stmts: Stmt):
+    def __init__(self, stmts: list[Stmt]):
         self.stmts = stmts
 
     def visit(self, v):
@@ -138,10 +138,8 @@ class Set(Expr):
         return v.set(self)
 
 
-# <mod>.<func>
-
-
 class Prop(Expr):
+    # <mod>.<func>
     def __init__(self, mod: Expr, name: Token):
         self.mod = mod
         self.name = name

@@ -26,7 +26,7 @@ class Lexer:
         "and": TType.And,
         "if": TType.If,
         "else": TType.Else,
-        "elif": TType.Elif
+        "elif": TType.Elif,
     }
 
     code: str
@@ -39,10 +39,10 @@ class Lexer:
         self.tokens = []
 
     @classmethod
-    def from_file(cls, file: str) -> 'Lexer':
+    def from_file(cls, file: str) -> "Lexer":
         lexer = cls()
 
-        f = open(file, 'r')
+        f = open(file, "r")
         code = f.read()
         f.close()
 
@@ -54,7 +54,7 @@ class Lexer:
         return lexer
 
     @classmethod
-    def from_repl(cls, code: str) -> 'Lexer':
+    def from_repl(cls, code: str) -> "Lexer":
         lexer = cls()
 
         lexer.code = code
@@ -68,114 +68,118 @@ class Lexer:
         while self.is_valid():
             char = self.code[self.i]
 
-            if char == '{':
-                if self.match('{'):
+            if char == "{":
+                if self.match("{"):
                     self.append_token(TType.LeftBBrace)
                 else:
                     self.append_token(TType.LeftBrace)
-            elif char == '}':
-                if self.match('}'):
+            elif char == "}":
+                if self.match("}"):
                     self.append_token(TType.RightBBrace)
                 else:
                     self.append_token(TType.RightBrace)
-            elif char == '(':
+            elif char == "(":
                 self.append_token(TType.LeftParen)
-            elif char == ')':
+            elif char == ")":
                 self.append_token(TType.RightParen)
-            elif char == '[':
+            elif char == "[":
                 self.append_token(TType.LeftBrack)
-            elif char == ']':
+            elif char == "]":
                 self.append_token(TType.RightBrack)
-            elif char == '!':
-                if self.match('='):
+            elif char == "!":
+                if self.match("="):
                     self.append_token(TType.NotEq)
                 else:
                     self.append_token(TType.Not)
-            elif char == '=':
-                if self.match('='):
+            elif char == "=":
+                if self.match("="):
                     self.append_token(TType.EqEq)
                 else:
                     self.append_token(TType.Eq)
-            elif char == '>':
-                if self.match('='):
+            elif char == ">":
+                if self.match("="):
                     self.append_token(TType.GreaterEq)
                 else:
                     self.append_token(TType.Greater)
-            elif char == '<':
-                if self.match('='):
+            elif char == "<":
+                if self.match("="):
                     self.append_token(TType.LessEq)
                 else:
                     self.append_token(TType.Less)
             elif char == '"' or char == "'":
                 # lf = self.lf
                 str_type = char
-                string = ''
+                string = ""
 
                 while self.is_valid() and self.peek() != str_type:
-                    if self.peek() == '\n':
+                    if self.peek() == "\n":
                         self.newline()
 
-                    if self.peek() == '\\':
+                    if self.peek() == "\\":
                         self.next()
                         c = self.peek()
                         self.next()
 
-                        if c == 'n':
-                            string += '\n'
-                        elif c == 'r':
-                            string += '\r'
-                        elif c == 't':
-                            string += '\t'
-                        elif c == 'a':
-                            string += '\x07'
-                        elif c == 'b':
-                            string += '\x08'
-                        elif c == 'e':
-                            string += '\x1b'
-                        elif c == 'f':
-                            string += '\x0c'
-                        elif c == 'v':
-                            string += '\x0b'
-                        elif c == '\\':
-                            string += '\\'
+                        if c == "n":
+                            string += "\n"
+                        elif c == "r":
+                            string += "\r"
+                        elif c == "t":
+                            string += "\t"
+                        elif c == "a":
+                            string += "\x07"
+                        elif c == "b":
+                            string += "\x08"
+                        elif c == "e":
+                            string += "\x1b"
+                        elif c == "f":
+                            string += "\x0c"
+                        elif c == "v":
+                            string += "\x0b"
+                        elif c == "\\":
+                            string += "\\"
                         elif c == "'":
                             string += "'"
                         elif c == '"':
                             string += '"'
-                        elif c == '?':
-                            string += '?'  # ?????
-                        elif c == 'o':
+                        elif c == "?":
+                            string += "?"  # ?????
+                        elif c == "o":
                             esc = self.read_n(3)
                             try:
                                 n = int(esc, 8)
                                 string += chr(n)
                             except:
                                 raise EoSyntaxError(
-                                    f"Invalid string escape '\\o{esc}'")
-                        elif c == 'x':
+                                    self.lf, f"Invalid string escape '\\o{esc}'"
+                                )
+                        elif c == "x":
                             esc = self.read_n(2)
                             try:
                                 n = int(esc, 16)
                                 string += chr(n)
                             except:
                                 raise EoSyntaxError(
-                                    f"Invalid string escape '\\x{esc}'")
-                        elif c == 'u':
+                                    self.lf, f"Invalid string escape '\\x{esc}'"
+                                )
+                        elif c == "u":
                             esc = self.read_n(4)
                             try:
                                 n = int(esc, 16)
                                 string += chr(n)
                             except:
                                 raise EoSyntaxError(
-                                    f"Invalid string escape '\\u{esc}'")
-                        elif c == 'U':
+                                    self.lf, f"Invalid string escape '\\u{esc}'"
+                                )
+                        elif c == "U":
                             esc = self.read_n(8)
                             try:
                                 n = int(esc, 16)
                                 string += chr(n)
                             except:
                                 raise EoSyntaxError(
-                                    f"Invalid string escape '\\U{esc}'")
+                                    self.lf, f"Invalid string escape '\\U{esc}'"
+                                )
                     else:
                         string += self.peek()
                         self.next()
@@ -185,63 +189,65 @@ class Lexer:
 
                 self.next()  # "
                 self.append_token(TType.String, string)
-            elif char == ',':
+            elif char == ",":
                 self.append_token(TType.Comma)
-            elif char == '.':
-                if self.match('.'):
+            elif char == ".":
+                if self.match("."):
                     self.append_token(TType.DotDot)
-                elif self.match('='):
+                elif self.match("="):
                     self.append_token(TType.DotEq)
                 else:
                     self.append_token(TType.Dot)
-            elif char == ';':
+            elif char == ";":
                 self.append_token(TType.Semi)
-            elif char == '?':
+            elif char == "?":
                 self.append_token(TType.Question)
-            elif char == ':':
+            elif char == ":":
                 self.append_token(TType.Colon)
-            elif char == '+':
-                if self.match('='):
+            elif char == "+":
+                if self.match("="):
                     self.append_token(TType.PlusEq)
                 else:
                     self.append_token(TType.Plus)
-            elif char == '-':
-                if self.match('='):
+            elif char == "-":
+                if self.match("="):
                     self.append_token(TType.MinusEq)
                 else:
                     self.append_token(TType.Minus)
-            elif char == '*':
-                if self.match('='):
+            elif char == "*":
+                if self.match("="):
                     self.append_token(TType.TimesEq)
-                elif self.match('*'):
-                    if self.match('='):
+                elif self.match("*"):
+                    if self.match("="):
                         self.append_token(TType.PowEq)
                     else:
                         self.append_token(TType.Pow)
                 else:
                     self.append_token(TType.Times)
-            elif char == '/':
-                if self.match('='):
+            elif char == "/":
+                if self.match("="):
                     self.append_token(TType.DivideEq)
-                elif self.match('/'):
-                    while self.peek() != '\n' and self.is_valid():
+                elif self.match("/"):
+                    while self.peek() != "\n" and self.is_valid():
                         self.next()
-                elif self.match('*'):
-                    while self.is_valid() and (self.peek() != '*' and self.peek(1) != '/'):
-                        if self.peek() == '\n':
+                elif self.match("*"):
+                    while self.is_valid() and (
+                        self.peek() != "*" and self.peek(1) != "/"
+                    ):
+                        if self.peek() == "\n":
                             self.newline()
                         self.next()
 
                     if not self.is_valid():
-                        raise EoSyntaxError("Unterminated multiline comment")
+                        raise EoSyntaxError(self.lf, "Unterminated multiline comment")
 
                     self.next()  # *
                     self.next()  # /
                 else:
                     self.append_token(TType.Divide)
-            elif char == ' ' or char == '\r' or char == '\t':
+            elif char == " " or char == "\r" or char == "\t":
                 pass
-            elif char == '\n':
+            elif char == "\n":
                 self.newline()
             else:
                 if self.is_alpha(char):
@@ -256,22 +262,28 @@ class Lexer:
                         self.append_token(TType.Identifier, name)
                 elif char.isdigit():
                     num = char
-                    while self.is_valid() and (self.peek().isdigit() or self.peek() == '_'):
+                    while self.is_valid() and (
+                        self.peek().isdigit() or self.peek() == "_"
+                    ):
                         c = self.peek()
-                        if c != '_':
+                        if c != "_":
                             num += c
                         self.next()
-                    
-                    if self.peek() == '.' and (self.peek(1) != '.' and self.peek(1) != '='):
+
+                    if self.peek() == "." and (
+                        self.peek(1) != "." and self.peek(1) != "="
+                    ):
                         num += self.peek()
                         self.next()
 
-                        while self.is_valid() and (self.peek().isdigit() or self.peek() == '_'):
+                        while self.is_valid() and (
+                            self.peek().isdigit() or self.peek() == "_"
+                        ):
                             c = self.peek()
-                            if c != '_':
+                            if c != "_":
                                 num += c
                             self.next()
-                        
+
                     self.append_token(TType.Number, float(num))
                 else:
                     raise EoSyntaxError(self.lf, f"Unexpected token '{char}'")
@@ -290,7 +302,7 @@ class Lexer:
         self.tokens.append(Token(tok, self.lf.copy(), data))
 
     def is_alpha(self, c: str):
-        return 'a' <= c.lower() and c.lower() <= 'z'
+        return "a" <= c.lower() and c.lower() <= "z"
 
     def is_alphanum(self, c: str):
         return self.is_alpha(c) or c.isdigit()
@@ -302,7 +314,7 @@ class Lexer:
         self.lf.col += 1
 
     def newline(self):
-        """ newline resets the col, but self.next() will still be called """
+        """newline resets the col, but self.next() will still be called"""
         self.lf.col = 0
         self.lf.line += 1
 
@@ -310,14 +322,15 @@ class Lexer:
 
     def peek(self, n=1):
         if not self.is_valid() or self.i + n >= self.lenc:
-            return '\0'
+            return "\0"
         return self.code[self.i + n]
 
     def read_n(self, n):
-        string = ''
+        string = ""
         for _ in range(0, n):
             string += self.peek()
             self.next()
+        return string
 
     def match(self, c: str):
         if self.peek() == c:

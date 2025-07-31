@@ -94,3 +94,6 @@ class Token:
         self.ttype = ttype
         self.lf = lf
         self.data = data
+
+    def __repr__(self) -> str:
+        return f"Token('{self.ttype.value}')"
