@@ -76,10 +76,17 @@ class Logical(Expr):
 
 
 class Call(Expr):
-    def __init__(self, func: Expr, paren: Token, args: list[Expr]):
+    def __init__(
+        self,
+        func: Expr,
+        paren: Token,
+        args: list[Expr],
+        named_args: list[tuple[Token, Expr]],
+    ):
         self.func = func
         self.paren = paren
         self.args = args
+        self.named_args = named_args
 
     def visit(self, v):
         return v.call(self)

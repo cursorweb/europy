@@ -114,7 +114,7 @@ class Parser:
         opt_params: list[tuple[str, ExprT]] = []
         seen_opt_params = False
 
-        while self.peek().ttype != TType.RightParen:
+        while not self.check(TType.RightParen):
             param = self.consume(TType.Identifier, "Expected parameter name")
 
             if not seen_opt_params and self.check(TType.Eq):
@@ -291,7 +291,45 @@ class Parser:
             right = self.unary()
             return Expr.Unary(op, right)
 
-        return self.primary()
+        return self.call()
+
+    def call(self) -> ExprT:
+        expr = self.primary()
+
+        if self.match(TType.LeftParen):
+            paren = self.prev()
+            args: list[ExprT] = []
+            named_args: list[tuple[Token, ExprT]] = []
+            seen_named_args = False
+
+            while not self.check(TType.RightParen):
+                if (
+                    not seen_named_args
+                    and self.check(TType.Identifier)
+                    and self.check(TType.Eq, 1)
+                ):
+                    seen_named_args = True
+
+                if seen_named_args:
+                    name = self.consume(
+                        TType.Identifier,
+                        "Named arguments may only come after positional arguments",
+                    )
+                    self.consume(
+                        TType.Eq,
+                        "Expected '=' after argument name",
+                    )
+                    val = self.expr()
+                    named_args.append((name, val))
+                else:
+                    args.append(self.expr())
+
+                if not self.match(TType.Comma):
+                    break
+
+            self.consume(TType.RightParen, "Expected ')' after arguments.")
+            expr = Expr.Call(expr, paren, args, named_args)
+        return expr
 
     def primary(self) -> ExprT:
         if self.match(TType.T_True):
@@ -346,11 +384,11 @@ class Parser:
 
         return False
 
-    def check(self, type: TType):
+    def check(self, type: TType, n=0):
         """Check if the current (unconsumed) token is the ttype we want"""
         if self.is_end():
             return False
-        return self.peek().ttype == type
+        return self.peek(n).ttype == type
 
     def consume(self, token: TType, msg: str):
         if self.check(token):

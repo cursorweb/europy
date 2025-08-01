@@ -58,7 +58,7 @@ block => "{" statement* "}"
 array => "[" ( expr "," )* ( expr )? "]"
 maps => "{{" ( expr ":" expr? "," )* ( expr ":" expr? )? "}}"
 
-args => ( expr | IDENTIFIER "=" expr ) ( "," ( expr | IDENTIFER "=" expr ) )*
+args => expr ( "," expr )* ( IDENTIFIER "=" expr ( "," IDENTIFIER "=" expr )* )?
 params => IDENTIFIER ( "," IDENTIFIER )* ( IDENTIFIER "=" expr ( "," IDENTIFIER "=" expr )* )?
 
 function => "(" params? ")" block

@@ -49,11 +49,15 @@ class Printer(ExprVisitor, StmtVisitor):
         return f"{e.type};"
 
     def ret_stmt(self, e):
-        pass
+        out = f" {self.eval_expr(e.val)}" if e.val else ""
+        return f"return{out};"
 
     def function(self, e):
-        aoeu = map(lambda n: f"{n[0]} = {self.eval_expr(n[1])}", e.opt_params)
-        return f"fn {e.name.data}({', '.join(e.params)}  {', '.join(aoeu)}) {self.print_block(e.block)}"
+        opt_params = ", " if len(e.params) and len(e.opt_params) else ""
+        opt_params += ", ".join(
+            [f"{name} = {self.eval_expr(expr)}" for name, expr in e.opt_params]
+        )
+        return f"fn {e.name.data}({', '.join(e.params)}{opt_params}) {self.print_block(e.block)}"
 
     def use_stmt(self, e):
         pass
@@ -88,8 +92,12 @@ class Printer(ExprVisitor, StmtVisitor):
         return f"{self.eval_expr(e.left)} {e.op.ttype.value} {self.eval_expr(e.right)}"
 
     def call(self, e: "Call"):
-        return ""
-        # return f"{self.eval(e.func)}({', '.join(map(self.eval, e.args))})"
+        args = ", ".join([self.eval_expr(arg) for arg in e.args])
+        named_args = ", " if len(e.named_args) and len(e.args) else ""
+        named_args += ", ".join(
+            [f"{tok.data} = {self.eval_expr(arg)}" for tok, arg in e.named_args]
+        )
+        return f"{self.eval_expr(e.func)}({args}{named_args})"
 
     def if_expr(self, e: "IfExpr"):
         return self.if_stmt(cast(IfStmt, e))
