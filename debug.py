@@ -18,7 +18,7 @@ class Printer(ExprVisitor, StmtVisitor):
         return e.visit(self)
 
     def eval_stmt(self, e: Stmt) -> str:
-        return f"{TAB * self.indent}{e.visit(self)}"
+        return f"{TAB * self.indent}{e.visit(self)}\n"
 
     """ stmt """
 
@@ -46,19 +46,20 @@ class Printer(ExprVisitor, StmtVisitor):
         pass
 
     def loop_flow(self, e):
-        pass
+        return f"{e.type};"
 
     def ret_stmt(self, e):
         pass
 
     def function(self, e):
-        pass
+        aoeu = map(lambda n: f"{n[0]} = {self.eval_expr(n[1])}", e.opt_params)
+        return f"fn {e.name.data}({', '.join(e.params)}  {', '.join(aoeu)}) {self.print_block(e.block)}"
 
     def use_stmt(self, e):
         pass
 
     def block_stmt(self, e):
-        return self.print_block(e.stmts)
+        return f"{self.print_block(e.stmts)}"
 
     """ expr """
 
@@ -119,4 +120,4 @@ class Printer(ExprVisitor, StmtVisitor):
         self.indent -= 1
 
         t = TAB * self.indent
-        return f"{{\n{out}\n{t}}}"
+        return f"{{\n{out}{t}}}"

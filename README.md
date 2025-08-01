@@ -10,6 +10,16 @@ This is **NOT** a replacement for Europa, nor is it a rewrite. This is just for 
         // runs forever
     }
     ```
+* Function rework
+    ```
+    fn add(a, b, c = 5) {
+        return a + b + c;
+    }
+    add(1, 2, 3);
+    ```
+    No longer *need* to name optional arguments (e.g. `c = 3`). You can, however, they must come after unnamed arguments.
+    **todo**: decide what to do with duplicate params (e.g. `fn add(b, b)`)
+* Module strategy: imported modules need to have a `mod` statement (or something similar) as the first statement, and they may not run code. Then, whenever a file is referenced, load it in. And then execute the main file.
 
 ## Motivation
 i have new ideas for europa, after being on hiatus, and i feel like to iterate faster, i should use python.

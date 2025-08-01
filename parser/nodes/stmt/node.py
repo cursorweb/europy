@@ -1,4 +1,5 @@
 from typing import Literal
+from enum import Enum
 from ..expr.base import Expr
 from .base import Stmt, StmtVisitor
 
@@ -91,17 +92,27 @@ class RetStmt(Stmt):
         return v.ret_stmt(self)
 
 
+class ParamType(Enum):
+    Named = "named"
+    Optional = "optional"
+
+
 class Function(Stmt):
     def __init__(
         self,
         name: Token,
-        args: list[Token],
-        opt_args: list[tuple[Token, Expr]],
+        args: list[str],
+        opt_args: list[tuple[str, Expr]],
         block: list[Stmt],
     ):
+        """
+        strategy: fill up as many args as possible,
+        then fill up opt_args.
+        Finally, used named variables to assign guys by creating a map str -> index
+        """
         self.name = name
-        self.args = args
-        self.opt_args = opt_args
+        self.params = args
+        self.opt_params = opt_args
         self.block = block
 
     def visit(self, v: StmtVisitor):

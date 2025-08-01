@@ -34,6 +34,9 @@ class Parser:
         if self.match(TType.Var):
             return self.var_decl()
 
+        if self.match(TType.Fn):
+            return self.fn_decl()
+
         if self.match(TType.While):
             return self.while_stmt()
 
@@ -48,9 +51,6 @@ class Parser:
 
         if self.match(TType.Break, TType.Continue, TType.Return):
             return self.controlflow_stmt()
-
-        if self.match(TType.Fn):
-            pass
 
         if self.match(TType.Use):
             pass
@@ -106,6 +106,39 @@ class Parser:
 
         return Stmt.VarDecl(vars)
 
+    def fn_decl(self) -> StmtT:
+        name = self.consume(TType.Identifier, "Expected function name")
+        self.consume(TType.LeftParen, "Expected '(' after function name")
+
+        params: list[str] = []
+        opt_params: list[tuple[str, ExprT]] = []
+        seen_opt_params = False
+
+        while self.peek().ttype != TType.RightParen:
+            param = self.consume(TType.Identifier, "Expected parameter name")
+
+            if not seen_opt_params and self.check(TType.Eq):
+                seen_opt_params = True
+
+            if seen_opt_params:
+                self.consume(
+                    TType.Eq,
+                    "Optional parameters may only come after required parameters",
+                )
+                expr = self.expr()
+                opt_params.append((param.data, expr))
+            else:
+                params.append(param.data)
+
+            if not self.match(TType.Comma):
+                break
+
+        self.consume(TType.RightParen, "Expected ')' after function parameters")
+        self.consume(TType.LeftBrace, "Expected '{' after function declaration")
+        stmts = self.block()
+
+        return Stmt.Function(name, params, opt_params, stmts)
+
     def while_stmt(self) -> StmtT:
         if self.match(TType.LeftBrace):
             cond = Expr.LiteralVal(eotypes.Bool(True))
@@ -124,7 +157,10 @@ class Parser:
         cond = self.expr()
         self.consume(TType.Semi, "Expected ';' after do while loop condition.")
 
-        return Stmt.BlockStmt([Stmt.BlockStmt(body), Stmt.WhileStmt(cond, body)])
+        return Stmt.WhileStmt(
+            Expr.LiteralVal(eotypes.Bool(True)),
+            [*body, Stmt.IfStmt(cond, [Stmt.LoopFlow("break")], [])],
+        )
 
     def for_stmt(self) -> StmtT:
         ident = self.consume(TType.Identifier, "Expected variable after 'for'.")
@@ -135,6 +171,7 @@ class Parser:
         return Stmt.ForStmt(ident.data, iterator, block)
 
     def block(self) -> list[StmtT]:
+        """Make sure to consume '{'"""
         stmts = []
 
         while not self.check(TType.RightBrace) and not self.is_end():
@@ -148,16 +185,19 @@ class Parser:
         tok = self.prev()
 
         if tok.ttype == TType.Break:
-            return Stmt.LoopFlow("break")
+            stmt = Stmt.LoopFlow("break")
         elif tok.ttype == TType.Continue:
-            return Stmt.LoopFlow("continue")
+            stmt = Stmt.LoopFlow("continue")
         elif tok.ttype == TType.Return:
             val = None
-            if self.get(TType.Semi):
+            if not self.get(TType.Semi):
                 val = self.expr()
-            return Stmt.RetStmt(val)
+            stmt = Stmt.RetStmt(val)
+        else:
+            raise Exception("unreachable")
 
-        raise Exception("unreachable")
+        self.consume(TType.Semi, "Expected ';' after control flow")
+        return stmt
 
     def expr_stmt(self) -> StmtT:
         expr = self.expr()
@@ -270,6 +310,10 @@ class Parser:
                 return Expr.LiteralVal(eotypes.String(t.data))
             else:
                 return Expr.LiteralVal(eotypes.Num(t.data))
+
+        if self.match(TType.Identifier):
+            name = self.prev()
+            return Expr.Variable(name)
 
         if self.match(TType.LeftParen):
             expr = self.expr()

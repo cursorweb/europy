@@ -2,7 +2,18 @@ program => statement* EOF
 
 
 # statements
-statement => exprStmt | varDecl | block | ifStmt | whileStmt | doWhileStmt | breakStmt | continueStmt | fnDecl | returnStmt | useStmt
+statement => exprStmt 
+           | varDecl
+           | block
+           | ifStmt
+           | whileStmt
+           | doWhileStmt
+           | forStmt
+           | breakStmt
+           | continueStmt
+           | fnDecl
+           | returnStmt
+           | useStmt
 
 exprStmt => ( expr ";" )
 varDecl => "var" IDENTIFIER ("=" expr )? ( "," IDENTIFIER ("=" expr )? )* ";"
@@ -48,7 +59,7 @@ array => "[" ( expr "," )* ( expr )? "]"
 maps => "{{" ( expr ":" expr? "," )* ( expr ":" expr? )? "}}"
 
 args => ( expr | IDENTIFIER "=" expr ) ( "," ( expr | IDENTIFER "=" expr ) )*
-params => ( IDENTIFIER | IDENTIFIER "=" expr ) ( "," ( IDENTIFIER | IDENTIFIER "=" expr ) )*
+params => IDENTIFIER ( "," IDENTIFIER )* ( IDENTIFIER "=" expr ( "," IDENTIFIER "=" expr )* )?
 
 function => "(" params? ")" block
 
