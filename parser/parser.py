@@ -16,13 +16,17 @@ class Parser:
         self.tokens = tokens
         self.i = 0
 
-    def run(self) -> list[StmtT]:
+    def run(self) -> tuple[list[EoSyntaxError], list[StmtT]]:
         stmts = []
+        errors = []
 
         while not self.is_end():
-            stmts.append(self.stmt())
+            try:
+                stmts.append(self.stmt())
+            except EoSyntaxError as e:
+                errors.append(e)
 
-        return stmts
+        return errors, stmts
 
     """ - AST - """
     """ Stmt """
@@ -97,12 +101,12 @@ class Parser:
                 elif self.match(TType.Comma):
                     continue
                 else:
-                    raise EoSyntaxError(
-                        self.prev().lf,
+                    self.report_err(
+                        self.prev(),
                         "Expected ',' or ';' after variable declaration.",
                     )
             else:
-                raise EoSyntaxError(self.prev().lf, "Expected variable name.")
+                self.report_err(self.prev(), "Expected variable name.")
 
         return Stmt.VarDecl(vars)
 
@@ -206,7 +210,7 @@ class Parser:
             semi = self.peek()
             # feature: last statement doesn't need semi (repl purposes probably)
             if semi.ttype != TType.RightBrace and semi.ttype != TType.EOF:
-                raise EoSyntaxError(semi.lf, "Expected ';' after statement.")
+                self.report_err(semi, "Expected ';' after statement.")
 
         return Stmt.ExprStmt(expr)
 
@@ -363,7 +367,7 @@ class Parser:
             return Expr.BlockExpr(stmts)
 
         tok = self.peek()
-        raise EoSyntaxError(tok.lf, f"Unexpected token '{tok.ttype}'")
+        self.report_err(tok, f"Unexpected token '{tok.ttype}'")
 
     """ Utils """
 
@@ -394,9 +398,33 @@ class Parser:
         if self.check(token):
             return self.next()
 
-        # no sync-ing can be done
-        # a raise terminates the whole process straight to catch
-        raise EoSyntaxError(self.peek().lf, msg)
+        self.report_err(self.peek(), msg)
+
+    def report_err(self, tok: Token, msg: str):
+        err = EoSyntaxError(tok.lf, msg)
+        self.synchronize()
+        raise err
+
+    def synchronize(self):
+        while not self.is_end():
+            if self.prev().ttype == TType.Semi:
+                # we want to make sure the semicolon is consumed
+                return
+
+            # these guys match the start of a statement probably
+            # so don't eat them!
+            match self.peek().ttype:
+                case (
+                    TType.Use
+                    | TType.Fn
+                    | TType.For
+                    | TType.If
+                    | TType.Return
+                    | TType.While
+                ):
+                    return
+
+            self.next()
 
     """ Pos """
 

@@ -18,10 +18,10 @@ except EoError as e:
 
 parser = Parser(tokens)
 
-try:
-    trees = parser.run()
-except EoError as e:
-    e.display()
+errs, trees = parser.run()
+if len(errs):
+    for err in errs:
+        err.display()
     exit()
 
 for tree in trees:
