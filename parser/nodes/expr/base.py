@@ -14,70 +14,70 @@ T = TypeVar("T")
 class ExprVisitor(ABC, Generic[T]):
     @abstractmethod
     def assign(self, e: "Assign") -> T:
-        pass
+        raise Exception()
 
     @abstractmethod
     def binary(self, e: "Binary") -> T:
-        pass
+        raise Exception()
 
     @abstractmethod
     def grouping(self, e: "Grouping") -> T:
-        pass
+        raise Exception()
 
     @abstractmethod
     def literal(self, e: "LiteralVal") -> T:
-        pass
+        raise Exception()
 
     @abstractmethod
     def unary(self, e: "Unary") -> T:
-        pass
+        raise Exception()
 
     @abstractmethod
     def variable(self, e: "Variable") -> T:
-        pass
+        raise Exception()
 
     @abstractmethod
     def block_expr(self, e: "BlockExpr") -> T:
-        pass
+        raise Exception()
 
     @abstractmethod
     def logical(self, e: "Logical") -> T:
-        pass
+        raise Exception()
 
     @abstractmethod
     def call(self, e: "Call") -> T:
-        pass
+        raise Exception()
 
     @abstractmethod
     def if_expr(self, e: "IfExpr") -> T:
-        pass
+        raise Exception()
 
     @abstractmethod
     def get(self, e: "Get") -> T:
-        pass
+        raise Exception()
 
     @abstractmethod
     def set(self, e: "Set") -> T:
-        pass
+        raise Exception()
 
     @abstractmethod
     def prop(self, e: "Prop") -> T:
-        pass
+        raise Exception()
 
     @abstractmethod
     def array(self, e: "Array") -> T:
-        pass
+        raise Exception()
 
     @abstractmethod
     def map(self, e: "Map") -> T:
-        pass
+        raise Exception()
 
     @abstractmethod
     def range(self, e: "Range") -> T:
-        pass
+        raise Exception()
 
 
 class Expr(ABC):
     @abstractmethod
     def visit(self, v: ExprVisitor[T]) -> T:
-        pass
+        raise Exception()

@@ -1,3 +1,5 @@
+from typing import NoReturn
+
 import eotypes
 from error.error import EoSyntaxError
 
@@ -61,7 +63,9 @@ class Parser:
 
         return self.expr_stmt()
 
-    def if_stmt(self):
+    def if_stmt(
+        self,
+    ) -> tuple[ExprT, list[StmtT], list[tuple[ExprT, list[StmtT]]], list[StmtT] | None]:
         cond = self.expr()
         self.consume(TType.LeftBrace, "Expected '{' after if statement condition.")
         true_br = self.block()
@@ -144,6 +148,7 @@ class Parser:
         return Stmt.Function(name, params, opt_params, stmts)
 
     def while_stmt(self) -> StmtT:
+        cond: ExprT
         if self.match(TType.LeftBrace):
             cond = Expr.LiteralVal(eotypes.Bool(True))
             body = self.block()
@@ -155,7 +160,7 @@ class Parser:
         return Stmt.WhileStmt(cond, body)
 
     def dowhile_stmt(self) -> StmtT:
-        self.consume(TType.LeftBrace, "Expected '{' after do keyword.")
+        tok = self.consume(TType.LeftBrace, "Expected '{' after do keyword.")
         body = self.block()
         self.consume(TType.While, "Expected 'while' after do loop body.")
         cond = self.expr()
@@ -163,7 +168,7 @@ class Parser:
 
         return Stmt.WhileStmt(
             Expr.LiteralVal(eotypes.Bool(True)),
-            [*body, Stmt.IfStmt(cond, [Stmt.LoopFlow("break")], [])],
+            [*body, Stmt.IfStmt(cond, [Stmt.LoopFlow(tok, "break")], [])],
         )
 
     def for_stmt(self) -> StmtT:
@@ -187,16 +192,17 @@ class Parser:
 
     def controlflow_stmt(self) -> StmtT:
         tok = self.prev()
+        stmt: StmtT
 
         if tok.ttype == TType.Break:
-            stmt = Stmt.LoopFlow("break")
+            stmt = Stmt.LoopFlow(tok, "break")
         elif tok.ttype == TType.Continue:
-            stmt = Stmt.LoopFlow("continue")
+            stmt = Stmt.LoopFlow(tok, "continue")
         elif tok.ttype == TType.Return:
             val = None
             if not self.get(TType.Semi):
                 val = self.expr()
-            stmt = Stmt.RetStmt(val)
+            stmt = Stmt.RetStmt(tok, val)
         else:
             raise Exception("unreachable")
 
@@ -220,7 +226,7 @@ class Parser:
         return self.ternary()
 
     def ternary(self) -> ExprT:
-        expr = self.logic_or()
+        expr = self.assignment()
 
         if self.match(TType.Question):
             if_true = self.expr()
@@ -229,6 +235,45 @@ class Parser:
 
             expr = Expr.IfExpr(expr, [Stmt.ExprStmt(if_true)], [], [Stmt.ExprStmt(els)])
 
+        return expr
+
+    def assignment(self) -> ExprT:
+        expr = self.logic_or()
+        if self.match(
+            TType.Eq,
+            TType.PlusEq,
+            TType.MinusEq,
+            TType.TimesEq,
+            TType.DivideEq,
+            TType.PowEq,
+            TType.ModEq,
+        ):
+            if not isinstance(expr, Expr.Variable):
+                self.report_err(self.prev(), "Invalid assignment target")
+            name = expr.name
+            assign_op = self.prev()
+            val = self.expr()
+            if assign_op.ttype == TType.Eq:
+                expr = Expr.Assign(name, val)
+            else:
+                match assign_op.ttype:
+                    case TType.PlusEq:
+                        op = TType.Plus
+                    case TType.MinusEq:
+                        op = TType.Minus
+                    case TType.TimesEq:
+                        op = TType.Times
+                    case TType.DivideEq:
+                        op = TType.Divide
+                    case TType.PowEq:
+                        op = TType.Pow
+                    case TType.ModEq:
+                        op = TType.Mod
+
+                expr = Expr.Assign(
+                    name,
+                    Expr.Binary(Expr.Variable(name), Token(op, assign_op.lf), val),
+                )
         return expr
 
     def logic_or(self) -> ExprT:
@@ -400,7 +445,7 @@ class Parser:
 
         self.report_err(self.peek(), msg)
 
-    def report_err(self, tok: Token, msg: str):
+    def report_err(self, tok: Token, msg: str) -> NoReturn:
         err = EoSyntaxError(tok.lf, msg)
         self.synchronize()
         raise err

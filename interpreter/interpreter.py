@@ -31,36 +31,36 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
         return self.eval_expr(e.expr)
 
     def var_decl(self, e: VarDecl):
-        pass
+        raise Exception()
 
     def block_stmt(self, e: BlockStmt):
         self.eval_block(e.stmts)
 
     def if_stmt(self, e: IfStmt):
-        pass
+        raise Exception()
 
     def while_stmt(self, e: WhileStmt):
-        pass
+        raise Exception()
 
     def for_stmt(self, e: ForStmt):
-        pass
+        raise Exception()
 
     def loop_flow(self, e: LoopFlow):
-        pass
+        raise Exception()
 
     def ret_stmt(self, e: RetStmt):
-        pass
+        raise Exception()
 
     def function(self, e: Function):
-        pass
+        raise Exception()
 
     def use_stmt(self, e: UseStmt):
-        pass
+        raise Exception()
 
     """ Expr """
 
     def assign(self, e: Assign):
-        pass
+        raise Exception()
 
     def binary(self, e: Binary):
         left = self.eval_expr(e.left)
@@ -112,7 +112,7 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
                 raise Exception("unreachable")
 
     def variable(self, e: Variable):
-        pass
+        raise Exception()
 
     def block_expr(self, e: BlockExpr):
         return self.eval_block(e.stmts)
@@ -130,7 +130,7 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
         self.eval_expr(e.right)
 
     def call(self, e: Call):
-        pass
+        raise Exception()
 
     def if_expr(self, e: IfExpr) -> Type:
         if self.is_truthy(self.eval_expr(e.cond)):
@@ -146,22 +146,22 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
         return Nil()
 
     def get(self, e: Get):
-        pass
+        raise Exception()
 
     def set(self, e: Set):
-        pass
+        raise Exception()
 
     def prop(self, e: Prop):
-        pass
+        raise Exception()
 
     def array(self, e: Array):
-        pass
+        raise Exception()
 
     def map(self, e: Map):
-        pass
+        raise Exception()
 
     def range(self, e: Range):
-        pass
+        raise Exception()
 
     """ Util """
 

@@ -110,7 +110,8 @@ class IfExpr(Expr):
 
 
 class Get(Expr):
-    # expr[expr]
+    """expr[expr]"""
+
     def __init__(self, expr: Expr, brack: Token, name: Expr):
         self.expr = expr
         self.brack = brack
@@ -121,7 +122,8 @@ class Get(Expr):
 
 
 class Set(Expr):
-    # expr[expr] = expr
+    """expr[expr] = expr"""
+
     def __init__(self, expr: Expr, brack: Token, name: Expr, val: Expr):
         self.expr = expr
         self.brack = brack
@@ -133,7 +135,8 @@ class Set(Expr):
 
 
 class Prop(Expr):
-    # <mod>.<func>
+    """<mod>.<func>"""
+
     def __init__(self, mod: Expr, name: Token):
         self.mod = mod
         self.name = name

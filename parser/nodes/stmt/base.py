@@ -9,47 +9,47 @@ if TYPE_CHECKING:
 class StmtVisitor(ABC):
     @abstractmethod
     def expr_stmt(self, e: "ExprStmt"):
-        pass
+        raise Exception()
 
     @abstractmethod
     def var_decl(self, e: "VarDecl"):
-        pass
+        raise Exception()
 
     @abstractmethod
     def block_stmt(self, e: "BlockStmt"):
-        pass
+        raise Exception()
 
     @abstractmethod
     def if_stmt(self, e: "IfStmt"):
-        pass
+        raise Exception()
 
     @abstractmethod
     def while_stmt(self, e: "WhileStmt"):
-        pass
+        raise Exception()
 
     @abstractmethod
     def for_stmt(self, e: "ForStmt"):
-        pass
+        raise Exception()
 
     @abstractmethod
     # break and continue
     def loop_flow(self, e: "LoopFlow"):
-        pass
+        raise Exception()
 
     @abstractmethod
     def ret_stmt(self, e: "RetStmt"):
-        pass
+        raise Exception()
 
     @abstractmethod
     def function(self, e: "Function"):
-        pass
+        raise Exception()
 
     @abstractmethod
     def use_stmt(self, e: "UseStmt"):
-        pass
+        raise Exception()
 
 
 class Stmt(ABC):
     @abstractmethod
     def visit(self, v: StmtVisitor):
-        pass
+        raise Exception()

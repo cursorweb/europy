@@ -77,7 +77,8 @@ class ForStmt(Stmt):
 
 
 class LoopFlow(Stmt):
-    def __init__(self, type: Literal["break", "continue"]):
+    def __init__(self, token: Token, type: Literal["break", "continue"]):
+        self.token = token
         self.type = type
 
     def visit(self, v: StmtVisitor):
@@ -85,7 +86,8 @@ class LoopFlow(Stmt):
 
 
 class RetStmt(Stmt):
-    def __init__(self, val: Expr | None = None):
+    def __init__(self, ret: Token, val: Expr | None = None):
+        self.token = ret
         self.val = val
 
     def visit(self, v: StmtVisitor):
