@@ -68,7 +68,7 @@ class Printer(ExprVisitor, StmtVisitor):
     """ expr """
 
     def assign(self, e: "Assign"):
-        return f"{e.name.data} = {self.eval_expr(e.value)}"
+        return f"{e.name.data}#{e.scope} = {self.eval_expr(e.value)}"
 
     def binary(self, e: "Binary"):
         return f"{self.eval_expr(e.left)} {e.op.ttype.value} {self.eval_expr(e.right)}"
@@ -83,7 +83,7 @@ class Printer(ExprVisitor, StmtVisitor):
         return f"{e.op}{self.eval_expr(e.expr)}"
 
     def variable(self, e: "Variable"):
-        return f"{e.name.data}"
+        return f"{e.name.data}#{e.scope}"
 
     def block_expr(self, e: "BlockExpr"):
         return self.print_block(e.stmts)

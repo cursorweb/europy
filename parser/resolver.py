@@ -6,15 +6,39 @@ from parser.nodes.expr.node import *
 from parser.nodes.stmt.node import *
 
 
+# TODO: in order to add shadowing, we are going to need to upgrade the resolver
 class Resolver(ExprVisitor, StmtVisitor):
+    scopes: list[dict[str, bool]]
+
     def __init__(self, trees: list[Stmt]):
         self.trees = trees
-        self.in_fn = False
-        self.in_loop = False
+        self.fn_depth = 0
+        """
+        We use depth instead of a `bool` because of this code example:
+        ```
+        fn a() {           // self.in_fn = True
+            fn b() {       // self.in_fn = True
+                return 1;
+            }              // self.in_fn = False
+            return 2;      // <-- Error?!
+        }
+        ```
+        Also, this exists in resolver in general because it's considered a *syntax error*,
+        and we want to catch as many of those as possible before runtime
+        (e.g. don't make Break an error that while loops implicitly catch)
+        """
+        self.loop_depth = 0
+        self.scopes = []
 
-    def run(self):
+    def run(self) -> list[EoSyntaxError]:
+        errs = []
         for tree in self.trees:
-            return self.rstmt(tree)
+            try:
+                self.rstmt(tree)
+            except EoSyntaxError as e:
+                errs.append(e)
+
+        return errs
 
     """ Resolve utils """
 
@@ -24,9 +48,38 @@ class Resolver(ExprVisitor, StmtVisitor):
     def rexpr(self, node: Expr):
         node.visit(self)
 
-    def resolve_block(self, nodes: list[Stmt]):
+    def rblock(self, nodes: list[Stmt], start_scope=True):
+        if start_scope:
+            self.begin_scope()
         for node in nodes:
             self.rstmt(node)
+        if start_scope:
+            self.end_scope()
+
+    def resolve_var(self, tok: Token, expr: Variable | Assign):
+        name = tok.data
+        for i, scope in enumerate(reversed(self.scopes)):
+            if name in scope and scope[name]:
+                expr.scope = i
+                return
+
+    def begin_scope(self):
+        self.scopes.append({})
+
+    def top(self):
+        return self.scopes[-1]
+
+    def end_scope(self):
+        self.scopes.pop()
+
+    def declare(self, var: str):
+        """Declare variable without giving it a value"""
+        if len(self.scopes):
+            self.top()[var] = False
+
+    def define(self, var: str):
+        if len(self.scopes):
+            self.top()[var] = True
 
     """ Stmt """
 
@@ -34,37 +87,40 @@ class Resolver(ExprVisitor, StmtVisitor):
         return self.rexpr(e.expr)
 
     def var_decl(self, e: VarDecl):
-        pass
+        for name, val in e.decls:
+            self.declare(name)
+            self.rexpr(val)
+            self.define(name)
 
     def block_stmt(self, e: BlockStmt):
-        return self.resolve_block(e.stmts)
+        self.rblock(e.stmts)
 
     def if_stmt(self, e: IfStmt):
         self.rexpr(e.cond)
-        self.resolve_block(e.if_true)
+        self.rblock(e.if_true)
         for cond, if_true in e.elifs:
             self.rexpr(cond)
-            self.resolve_block(if_true)
+            self.rblock(if_true)
         if e.els:
-            self.resolve_block(e.els)
+            self.rblock(e.els)
 
     def while_stmt(self, e: WhileStmt):
         self.rexpr(e.cond)
-        self.in_loop = True
-        self.resolve_block(e.block)
-        self.in_loop = False
+        self.loop_depth += 1
+        self.rblock(e.block)
+        self.loop_depth -= 1
 
     def for_stmt(self, e: ForStmt):
         raise Exception()
 
     def loop_flow(self, e: LoopFlow):
-        if not self.in_loop:
+        if self.loop_depth == 0:
             raise EoSyntaxError(
                 e.token.lf, f"{e.type} statements can only be used inside loops"
             )
 
     def ret_stmt(self, e: RetStmt):
-        if not self.in_fn:
+        if self.fn_depth == 0:
             raise EoSyntaxError(
                 e.token.lf, "Return statements can only be inside functions"
             )
@@ -73,23 +129,32 @@ class Resolver(ExprVisitor, StmtVisitor):
             self.rexpr(e.val)
 
     def function(self, e: Function):
+        self.declare(e.name.data)
+        self.define(e.name.data)
+
+        self.begin_scope()
         for name in e.params:
-            pass
+            self.declare(name)
+            self.define(name)
 
         for name, expr in e.opt_params:
+            self.declare(name)
             self.rexpr(expr)
+            self.define(name)
 
-        self.in_fn = True
-        self.resolve_block(e.block)
-        self.in_fn = False
+        self.fn_depth += 1
+        self.rblock(e.block, False)
+        self.fn_depth -= 1
+        self.end_scope()
 
     def use_stmt(self, e: UseStmt):
-        pass
+        raise Exception()
 
     """ Expr """
 
     def assign(self, e: Assign):
-        raise Exception()
+        self.resolve_var(e.name, e)
+        self.rexpr(e.value)
 
     def binary(self, e: Binary):
         self.rexpr(e.left)
@@ -105,10 +170,16 @@ class Resolver(ExprVisitor, StmtVisitor):
         self.rexpr(e.expr)
 
     def variable(self, e: Variable):
-        raise Exception()
+        name = e.name.data
+        if len(self.scopes) and name in self.top() and not self.top()[name]:
+            raise EoSyntaxError(
+                e.name.lf, "Variable can't refer to itself in declaration"
+            )
+
+        self.resolve_var(e.name, e)
 
     def block_expr(self, e: BlockExpr):
-        self.resolve_block(e.stmts)
+        self.rblock(e.stmts)
 
     def logical(self, e: Logical):
         self.rexpr(e.left)
@@ -123,12 +194,12 @@ class Resolver(ExprVisitor, StmtVisitor):
 
     def if_expr(self, e: IfExpr):
         self.rexpr(e.cond)
-        self.resolve_block(e.if_true)
+        self.rblock(e.if_true)
         for cond, if_true in e.elifs:
             self.rexpr(cond)
-            self.resolve_block(if_true)
+            self.rblock(if_true)
         if e.els:
-            self.resolve_block(e.els)
+            self.rblock(e.els)
 
     def get(self, e: Get):
         raise Exception()

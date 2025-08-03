@@ -24,7 +24,7 @@ whileStmt => "while" expr? block
 doWhileStmt => "do" block "while" expr ";"
 forStmt => "for" ( IDENTIFIER "in" expr ) block
 
-breakStmt => "break" ";"
+breakStmt => "break" ";"        # todo: "break" expr ";"
 continueStmt => "continue" ";"
 
 fnDecl => "fn" IDENTIFIER function

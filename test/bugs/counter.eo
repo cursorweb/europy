@@ -1,0 +1,12 @@
+// use io.println;
+
+fn makeCounter() {
+    var count = 0;
+    fn inc() {
+        count += 1;
+    }
+    return inc;
+}
+
+var c = makeCounter();
+c();

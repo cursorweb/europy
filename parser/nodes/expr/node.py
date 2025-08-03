@@ -8,6 +8,7 @@ class Assign(Expr):
     def __init__(self, name: Token, value: Expr):
         self.name = name
         self.value = value
+        self.scope = -1
 
     def visit(self, v):
         return v.assign(self)
@@ -51,6 +52,7 @@ class Unary(Expr):
 class Variable(Expr):
     def __init__(self, name: Token):
         self.name = name
+        self.scope = -1
 
     def visit(self, v):
         return v.variable(self)

@@ -1,3 +1,5 @@
+from error.error import LoopBreak, LoopContinue
+from interpreter.environment import Environment
 from parser.nodes.expr.base import Expr, ExprVisitor
 from parser.nodes.stmt.base import Stmt, StmtVisitor
 
@@ -10,8 +12,12 @@ from parser.nodes.stmt.node import *
 
 
 class Interpreter(ExprVisitor[Type], StmtVisitor):
+    env: Environment
+
     def __init__(self, tree: list[Stmt]):  # expr for now
         self.trees = tree
+        self.globals = Environment()
+        self.env = self.globals
 
     def run(self):
         for tree in self.trees:
@@ -31,7 +37,8 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
         return self.eval_expr(e.expr)
 
     def var_decl(self, e: VarDecl):
-        raise Exception()
+        for name, expr in e.decls:
+            self.env.define(name, self.eval_expr(expr))
 
     def block_stmt(self, e: BlockStmt):
         self.eval_block(e.stmts)
@@ -40,13 +47,23 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
         raise Exception()
 
     def while_stmt(self, e: WhileStmt):
-        raise Exception()
+        while self.is_truthy(self.eval_expr(e.cond)):
+            try:
+                self.eval_block(e.block)
+            except LoopBreak:
+                break
+            except LoopContinue:
+                pass
 
     def for_stmt(self, e: ForStmt):
         raise Exception()
 
     def loop_flow(self, e: LoopFlow):
-        raise Exception()
+        match e.type:
+            case "break":
+                raise LoopBreak()
+            case "continue":
+                raise LoopContinue()
 
     def ret_stmt(self, e: RetStmt):
         raise Exception()
@@ -60,7 +77,8 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
     """ Expr """
 
     def assign(self, e: Assign):
-        raise Exception()
+
+        return Nil()
 
     def binary(self, e: Binary):
         left = self.eval_expr(e.left)
@@ -165,11 +183,17 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
 
     """ Util """
 
-    def eval_block(self, stmts: list[Stmt]):
-        out: Type = Nil()
-        for stmt in stmts:
-            if isinstance(stmt, ExprStmt):
-                out = self.eval_expr(stmt.expr)
+    def eval_block(self, stmts: list[Stmt], env: Environment | None = None):
+        """Pass in an `env` because for functions, they need to declare their parameters"""
+        prev = self.env
+        try:  # for 'return', 'break' etc.
+            self.env = env if env != None else Environment(prev)
+            out: Type = Nil()
+            for stmt in stmts:
+                if isinstance(stmt, ExprStmt):
+                    out = self.eval_expr(stmt.expr)
+        finally:
+            self.env = prev
 
         return out
 

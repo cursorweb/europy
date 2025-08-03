@@ -1,3 +1,7 @@
-var a = 5;
-a += 5;
-a
+{
+    fn get_a() {
+        println(a);
+    }
+    var a = 5;
+    get_a();
+}

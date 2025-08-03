@@ -303,7 +303,7 @@ class Lexer:
         self.tokens.append(Token(tok, self.lf.copy(), data))
 
     def is_alpha(self, c: str):
-        return "a" <= c.lower() and c.lower() <= "z"
+        return "a" <= c.lower() and c.lower() <= "z" or c == "_"
 
     def is_alphanum(self, c: str):
         return self.is_alpha(c) or c.isdigit()

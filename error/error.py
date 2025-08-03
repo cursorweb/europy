@@ -35,6 +35,11 @@ class EoSyntaxError(EoError):
         super().__init__("SyntaxError", lf, msg)
 
 
+class EoRuntimeError(EoError):
+    def __init__(self, lf: LineInfo, msg: str):
+        super().__init__("RuntimeError", lf, msg)
+
+
 class EoTypeError(EoError):
     def __init__(self, lf: "LineInfo", msg: str):
         super().__init__("TypeError", lf, msg)
@@ -50,3 +55,11 @@ class EoTypeErrorResult(BaseException):
         return EoTypeError(
             op.lf, f"Operator '{op.ttype}' can't be applied to {', '.join(self.types)}"
         )
+
+
+class LoopBreak(BaseException):
+    pass
+
+
+class LoopContinue(BaseException):
+    pass

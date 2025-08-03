@@ -7,9 +7,9 @@ from parser.nodes import *  # hack
 from sys import exit
 
 from error import EoError
+from parser.resolver import Resolver
 
-lexer = Lexer.from_file("test/playground.eo")
-
+lexer = Lexer.from_file("test/bugs/counter.eo")
 try:
     tokens = lexer.run()
 except EoError as e:
@@ -17,8 +17,14 @@ except EoError as e:
     exit()
 
 parser = Parser(tokens)
-
 errs, trees = parser.run()
+if len(errs):
+    for err in errs:
+        err.display()
+    exit()
+
+resolver = Resolver(trees)
+errs = resolver.run()
 if len(errs):
     for err in errs:
         err.display()

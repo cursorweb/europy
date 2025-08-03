@@ -1,0 +1,16 @@
+use io.println;
+
+var a = 5;
+var b;
+
+{
+    // var a = 7;
+    /* prints 7 or 5 but shouldn't error */
+    fn temp() {
+        println(a);
+    }
+
+    b = temp;
+}
+
+b();
