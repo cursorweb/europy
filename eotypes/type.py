@@ -47,6 +47,9 @@ class Type(ABC):
     def not_op(self) -> "Type":
         raise EoTypeErrorResult(self)
 
+    def __repr__(self) -> str:
+        return self.to_string()
+
 
 class Bool(Type):
     val: bool

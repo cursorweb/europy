@@ -27,4 +27,7 @@ class String(Type):
 
     def to_string(self):
         v = self.val.replace('"', '\\"')
-        return f'"{v}"'
+        return v
+
+    def __repr__(self) -> str:
+        return f'"{self.to_string()}"'

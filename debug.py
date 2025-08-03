@@ -77,7 +77,7 @@ class Printer(ExprVisitor, StmtVisitor):
         return f"({self.eval_expr(e.expr)})"
 
     def literal(self, e: "LiteralVal"):
-        return f"{e.val.to_string()}"
+        return f"{repr(e.val)}"
 
     def unary(self, e: "Unary"):
         return f"{e.op}{self.eval_expr(e.expr)}"

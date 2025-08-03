@@ -3,3 +3,5 @@ fn call(a, b = 5, c = 6) {
 }
 
 call(1, 2, b = 6); // 2 and b = 6 both go to b, so shouldn't work
+call(1, 2, g = 3); // lmao
+call(a = 1);

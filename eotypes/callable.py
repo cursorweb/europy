@@ -1,10 +1,12 @@
-from typing import Literal
+from abc import ABC, abstractmethod
+from collections.abc import Callable as PyFn
+
+from error.error import EoRuntimeError
+from tokens import Token
 from .type import Type
 
 
-class NativeCallable(Type):
-    param_map: dict[str, tuple[Literal["pos"], int] | Literal["opt"]]
-
+class Callable(Type, ABC):
     def __init__(self, params: list[str], opt_params: list[tuple[str, Type]]):
         """
         strategy: fill up as many args as possible,
@@ -25,55 +27,92 @@ class NativeCallable(Type):
         self.max_arity = len(params) + len(opt_params)
         self.tname = "<native fn>"
 
-        # suppose we have function `fn add(a, b, c = 5) {}`
-        # then, `param_map = { "a": ('pos', 0), "b": ('pos', 1), "c": 'opt' }`
-        # this `param_map` is used for named arguments.
-        param_map: dict[str, tuple[Literal["pos"], int] | Literal["opt"]] = {}
-        # then, `opt_param_idx = { 2: "c" }`
-        # this `opt_param_idx` is used to know where to assign arguments that go above
-        # positional argument arity (e.g. c, the '3rd' argument goes *beyond* the expected 2 *positional* arguments, so we need to know which opt_param that is)
-        opt_param_idx: dict[int, str] = {}
-
-        for i, param in enumerate(params):
-            param_map[param] = ("pos", i)
-
-        arity = self.min_arity
-        for i, (param, _) in enumerate(opt_params):
-            param_map[param] = "opt"
-            opt_param_idx = {arity + i: param}
-
-        self.param_map = param_map
-        self.opt_param_idx = opt_param_idx
+        self.params = params
         self.opt_params = opt_params
+        self.param_names = set(params) | set(name for name, _ in opt_params)
 
-    def call(self, pos_args: list[Type], named_args: dict[str, Type]):
+    def call(self, paren: Token, pos_args: list[Type], named_args: dict[str, Type]):
+        bound_args = self.bind(paren, pos_args, named_args)
+        self.exec(bound_args)
+
+    def bind(
+        self, paren: Token, pos_args: list[Type], named_args: dict[str, Type]
+    ) -> dict[str, Type]:
         """
-        Function to give the correct arguments to the correct people,
-        and then call exec which runs the function
+        Bind the arguments to the call, and then `exec` the call
+
+        Let pos_arity = len(params), total_arity = len(params) + len(opt_params)
+        1. Check correct arity
+        2. Initialize bound_args with default values
+        3. Assign all positional arguments (x > pos_arity is an opt_param) to the bound dict
+        4. Assign all named arguments by setting the map. Check to make sure that no argument is *re-assigned*
+        5. Check to make sure that there are no extraneous arguments
         """
+        # check correct arity:
+        total_args = len(pos_args) + len(named_args)
+        if not (self.min_arity <= total_args <= self.max_arity):
+            argrange = f"{self.min_arity}{f' to {self.max_arity}' if self.max_arity != self.min_arity else ''}"
+            raise EoRuntimeError(
+                paren.lf, f"Too many arguments. (Got {total_args}, expected {argrange})"
+            )
 
-        # suppose we have function `fn add(a, b, c = 5) {}` and `add(1, 2, c = 3)`
-        # then, `args     = [1, 2]`
-        # and,  `opt_args = { "c": 3 }`
+        bound_args: dict[str, Type] = {}
 
-        arity = self.min_arity
-        args = []
-        opt_args = {}
-        for i, arg in enumerate(pos_args):
-            if i < arity:
-                args.append(arg)
+        for name, value in self.opt_params:
+            bound_args[name] = value
+
+        params = self.params
+        opt_params = self.opt_params
+        param_names = self.param_names
+
+        # assign all positional arguments
+        for i, value in enumerate(pos_args):
+            if i < len(params):
+                name = params[i]
+                bound_args[name] = value
             else:
-                name = self.opt_param_idx[i]
-                opt_args[name] = arg
+                idx = i - len(params)
+                assert idx < len(opt_params)
+                name, _ = opt_params[idx]
+                bound_args[name] = value
 
-        for name, val in named_args:
-            result = self.param_map[name]
-            if result == "opt":
-                opt_args[name] = val
+        # assign all named args
+        for name, value in named_args.items():
+            if not name in bound_args:
+                bound_args[name] = value
             else:
-                _, idx = result
-                args[idx] = val
+                raise EoRuntimeError(paren.lf, f"Duplicate argument '{name}'.")
 
-    def exec(self, args: list[Type], opt_params: dict[str, Type]):
+        for param in self.params:
+            # check that no required params are missing:
+            if not param in bound_args:
+                raise EoRuntimeError(
+                    paren.lf, f"Missing argument for parameter '{param}'."
+                )
+
+        # check that no extraneous params are present:
+        for name in bound_args:
+            if name not in param_names:
+                raise EoRuntimeError(paren.lf, f"Unexpected named argument '{param}'.")
+
+        return bound_args
+
+    @abstractmethod
+    def exec(self, args: dict[str, Type]) -> Type:
         """Actually run code here"""
         pass
+
+
+def make_fn(
+    params: list[str],
+    opt_params: list[tuple[str, Type]],
+    fn: PyFn[[dict[str, Type]], Type],
+):
+    class Out(Callable):
+        def __init__(self):
+            super().__init__(params, opt_params)
+
+        def exec(self, args: dict[str, Type]) -> Type:
+            return fn(args)
+
+    return Out()

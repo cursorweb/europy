@@ -1,3 +1,4 @@
+from eotypes.callable import Callable, make_fn
 from error.error import EoTypeError, LoopBreak, LoopContinue
 from interpreter.environment import Environment
 from parser.nodes.expr.base import Expr, ExprVisitor
@@ -18,6 +19,12 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
         self.trees = tree
         self.globals = Environment()
         self.env = self.globals
+
+        def fn(dict):
+            print(dict["name"].to_string())
+            return Nil()
+
+        self.globals.define("print", make_fn(["name"], [], fn))
 
     def run(self):
         for tree in self.trees:
@@ -130,7 +137,7 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
                 raise Exception("unreachable")
 
     def variable(self, e: Variable):
-        raise Exception()
+        return self.env.get(e.name)
 
     def block_expr(self, e: BlockExpr):
         return self.eval_block(e.stmts)
@@ -150,8 +157,15 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
     def call(self, e: Call):
         callee = self.eval_expr(e.func)
 
-        if not isinstance(callee, Function):
+        if not isinstance(callee, Callable):
             raise EoTypeError(e.paren.lf, "Invalid call target.")
+
+        args = [self.eval_expr(expr) for expr in e.args]
+        named_args: dict[str, Type] = dict(
+            (token.data, self.eval_expr(expr)) for token, expr in e.named_args
+        )
+
+        callee.call(e.paren, args, named_args)
 
     def if_expr(self, e: IfExpr) -> Type:
         if self.is_truthy(self.eval_expr(e.cond)):
