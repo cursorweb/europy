@@ -105,7 +105,7 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
         if e.scope != None:
             self.env.assign_at(e.name, value, e.scope)
         else:
-            self.env.assign(e.name, value)
+            self.globals.assign(e.name, value)
         return Nil()
 
     def binary(self, e: Binary):

@@ -1,25 +1,15 @@
-/*
-fn makeCounter() {
-  var i = 0;
-  fn count() {
-    i += 1;
-    print(i);
-  }
-
-  return count;
-}
-
-var counter = makeCounter();
-counter(); // "1".
-counter(); // "2".
-*/
 
 var a = 5;
+var showA;
+
 {
-fn showA() {
-    print(a);
+    // var a = 7;
+    /* prints 7 or 5 but shouldn't error */
+    fn temp() {
+        print(a);
+    }
+
+    showA = temp;
 }
+
 showA();
-var a = 6;
-showA();
-}
