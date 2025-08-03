@@ -1,4 +1,4 @@
-from error.error import LoopBreak, LoopContinue
+from error.error import EoTypeError, LoopBreak, LoopContinue
 from interpreter.environment import Environment
 from parser.nodes.expr.base import Expr, ExprVisitor
 from parser.nodes.stmt.base import Stmt, StmtVisitor
@@ -148,7 +148,10 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
         self.eval_expr(e.right)
 
     def call(self, e: Call):
-        raise Exception()
+        callee = self.eval_expr(e.func)
+
+        if not isinstance(callee, Function):
+            raise EoTypeError(e.paren.lf, "Invalid call target.")
 
     def if_expr(self, e: IfExpr) -> Type:
         if self.is_truthy(self.eval_expr(e.cond)):

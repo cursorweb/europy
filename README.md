@@ -17,8 +17,12 @@ This is **NOT** a replacement for Europa, nor is it a rewrite. This is just for 
     }
     add(1, 2, 3);
     ```
-    No longer *need* to name optional arguments (e.g. `c = 3`). You can, however, they must come after unnamed arguments.
-    **todo**: decide what to do with duplicate params (e.g. `fn add(b, b)`)
+    No longer *need* to name optional arguments (e.g. `c = 3`). You can, however, they must come after unnamed (positional) arguments.
+    
+    Also, you can't have duplicate parameters. This no longer works:
+    ```
+    fn dup(a, a) {}
+    ```
 * Module strategy: imported modules need to have a `mod` statement (or something similar) as the first statement, and they may not run code. Then, whenever a file is referenced, load it in. And then execute the main file.
 
 ## Motivation

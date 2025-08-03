@@ -1,6 +1,5 @@
 from typing import Any
 from error.error import EoTypeErrorResult
-from tokens import Token
 from abc import ABC
 
 
