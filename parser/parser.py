@@ -118,8 +118,8 @@ class Parser:
         name = self.consume(TType.Identifier, "Expected function name")
         self.consume(TType.LeftParen, "Expected '(' after function name")
 
-        params: list[str] = []
-        opt_params: list[tuple[str, ExprT]] = []
+        params: list[Token] = []
+        opt_params: list[tuple[Token, ExprT]] = []
         seen_opt_params = False
 
         while not self.check(TType.RightParen):
@@ -134,9 +134,9 @@ class Parser:
                     "Optional parameters may only come after required parameters",
                 )
                 expr = self.expr()
-                opt_params.append((param.data, expr))
+                opt_params.append((param, expr))
             else:
-                params.append(param.data)
+                params.append(param)
 
             if not self.match(TType.Comma):
                 break

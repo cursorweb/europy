@@ -132,12 +132,26 @@ class Resolver(ExprVisitor, StmtVisitor):
         self.declare(e.name.data)
         self.define(e.name.data)
 
+        seen_names = set()
+
         self.begin_scope()
-        for name in e.params:
+        for token in e.params:
+            name = token.data
+
+            if name in seen_names:
+                raise EoSyntaxError(token.lf, f"Duplicate parameter '{name}'.")
+            seen_names.add(name)
+
             self.declare(name)
             self.define(name)
 
-        for name, expr in e.opt_params:
+        for token, expr in e.opt_params:
+            name = token.data
+
+            if name in seen_names:
+                raise EoSyntaxError(token.lf, f"Duplicate parameter '{name}'.")
+            seen_names.add(name)
+
             self.declare(name)
             self.rexpr(expr)
             self.define(name)

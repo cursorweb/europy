@@ -103,8 +103,8 @@ class Function(Stmt):
     def __init__(
         self,
         name: Token,
-        args: list[str],
-        opt_args: list[tuple[str, Expr]],
+        args: list[Token],
+        opt_args: list[tuple[Token, Expr]],
         block: list[Stmt],
     ):
         """

@@ -55,9 +55,9 @@ class Printer(ExprVisitor, StmtVisitor):
     def function(self, e):
         opt_params = ", " if len(e.params) and len(e.opt_params) else ""
         opt_params += ", ".join(
-            [f"{name} = {self.eval_expr(expr)}" for name, expr in e.opt_params]
+            [f"{name.data} = {self.eval_expr(expr)}" for name, expr in e.opt_params]
         )
-        return f"fn {e.name.data}({', '.join(e.params)}{opt_params}) {self.print_block(e.block)}"
+        return f"fn {e.name.data}({', '.join([tok.data for tok in e.params])}{opt_params}) {self.print_block(e.block)}"
 
     def use_stmt(self, e):
         pass

@@ -1,7 +1,1 @@
-{
-    fn get_a() {
-        println(a);
-    }
-    var a = 5;
-    get_a();
-}
+fn my_name(a, b = 5, ) {}
