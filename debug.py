@@ -48,11 +48,11 @@ class Printer(ExprVisitor, StmtVisitor):
     def loop_flow(self, e):
         return f"{e.type};"
 
-    def ret_stmt(self, e):
+    def return_stmt(self, e):
         out = f" {self.eval_expr(e.val)}" if e.val else ""
         return f"return{out};"
 
-    def function(self, e):
+    def fn_decl(self, e):
         opt_params = ", " if len(e.params) and len(e.opt_params) else ""
         opt_params += ", ".join(
             [f"{name.data} = {self.eval_expr(expr)}" for name, expr in e.opt_params]

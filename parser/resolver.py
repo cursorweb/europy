@@ -119,7 +119,7 @@ class Resolver(ExprVisitor, StmtVisitor):
                 e.token.lf, f"{e.type} statements can only be used inside loops"
             )
 
-    def ret_stmt(self, e: RetStmt):
+    def return_stmt(self, e: ReturnStmt):
         if self.fn_depth == 0:
             raise EoSyntaxError(
                 e.token.lf, "Return statements can only be inside functions"
@@ -128,7 +128,7 @@ class Resolver(ExprVisitor, StmtVisitor):
         if e.val:
             self.rexpr(e.val)
 
-    def function(self, e: Function):
+    def fn_decl(self, e: FunctionDecl):
         self.declare(e.name.data)
         self.define(e.name.data)
 

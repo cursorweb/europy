@@ -63,3 +63,8 @@ class LoopBreak(BaseException):
 
 class LoopContinue(BaseException):
     pass
+
+
+class FnReturn(BaseException):
+    def __init__(self, val: "Type") -> None:
+        self.val = val

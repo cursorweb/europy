@@ -37,11 +37,11 @@ class StmtVisitor(ABC):
         raise Exception()
 
     @abstractmethod
-    def ret_stmt(self, e: "RetStmt"):
+    def return_stmt(self, e: "ReturnStmt"):
         raise Exception()
 
     @abstractmethod
-    def function(self, e: "Function"):
+    def fn_decl(self, e: "FunctionDecl"):
         raise Exception()
 
     @abstractmethod

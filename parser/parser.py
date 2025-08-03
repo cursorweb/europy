@@ -145,7 +145,7 @@ class Parser:
         self.consume(TType.LeftBrace, "Expected '{' after function declaration")
         stmts = self.block()
 
-        return Stmt.Function(name, params, opt_params, stmts)
+        return Stmt.FunctionDecl(name, params, opt_params, stmts)
 
     def while_stmt(self) -> StmtT:
         cond: ExprT
@@ -202,7 +202,7 @@ class Parser:
             val = None
             if not self.get(TType.Semi):
                 val = self.expr()
-            stmt = Stmt.RetStmt(tok, val)
+            stmt = Stmt.ReturnStmt(tok, val)
         else:
             raise Exception("unreachable")
 

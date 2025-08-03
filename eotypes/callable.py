@@ -1,9 +1,16 @@
 from abc import ABC, abstractmethod
 from collections.abc import Callable as PyFn
+from typing import TYPE_CHECKING
 
-from error.error import EoRuntimeError
+from eotypes.nil import Nil
+from error.error import EoRuntimeError, FnReturn
+from interpreter.environment import Environment
+from parser.nodes.stmt.base import Stmt
 from tokens import Token
 from .type import Type
+
+if TYPE_CHECKING:
+    from interpreter.interpreter import Interpreter
 
 
 class Callable(Type, ABC):
@@ -25,15 +32,17 @@ class Callable(Type, ABC):
         """
         self.min_arity = len(params)
         self.max_arity = len(params) + len(opt_params)
-        self.tname = "<native fn>"
+        self.tname = "function"
 
         self.params = params
         self.opt_params = opt_params
         self.param_names = set(params) | set(name for name, _ in opt_params)
 
-    def call(self, paren: Token, pos_args: list[Type], named_args: dict[str, Type]):
+    def call(
+        self, paren: Token, pos_args: list[Type], named_args: dict[str, Type]
+    ) -> Type:
         bound_args = self.bind(paren, pos_args, named_args)
-        self.exec(bound_args)
+        return self.exec(bound_args)
 
     def bind(
         self, paren: Token, pos_args: list[Type], named_args: dict[str, Type]
@@ -111,8 +120,37 @@ def make_fn(
     class Out(Callable):
         def __init__(self):
             super().__init__(params, opt_params)
+            self.val = f"<builtin fn>"
 
         def exec(self, args: dict[str, Type]) -> Type:
             return fn(args)
 
     return Out()
+
+
+class EoFunction(Callable):
+    def __init__(
+        self,
+        name: str,
+        params: list[str],
+        opt_params: list[tuple[str, Type]],
+        block: list[Stmt],
+        interpreter: "Interpreter",
+    ):
+        super().__init__(params, opt_params)
+        self.val = f"<fn {name}>"
+        self.block = block
+        self.interpreter = interpreter
+
+    def exec(self, args: dict[str, Type]) -> Type:
+        interpreter = self.interpreter
+        env = Environment(interpreter.globals)
+        for arg, val in args.items():
+            env.define(arg, val)
+
+        try:
+            out = interpreter.eval_block(self.block, env)
+        except FnReturn as r:
+            out = r.val
+
+        return out

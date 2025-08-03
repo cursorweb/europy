@@ -31,8 +31,9 @@ if len(errs):
     exit()
 
 for tree in trees:
+    pass
+    # print(tree)
     print(Printer(tree).run())
-
 
 interpreter = Interpreter(trees)
 

@@ -66,5 +66,17 @@ class Num(Type):
 
         raise EoTypeErrorResult(self, right)
 
+    def grtre(self, right: "Type") -> "Type":
+        if right.tname == "num":
+            return Bool(self.val >= right.val)
+
+        raise EoTypeErrorResult(self, right)
+
+    def lesse(self, right: "Type") -> "Type":
+        if right.tname == "num":
+            return Bool(self.val <= right.val)
+
+        raise EoTypeErrorResult(self, right)
+
     def negate(self) -> "Type":
         return Num(-self.val)

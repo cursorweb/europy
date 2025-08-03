@@ -41,6 +41,12 @@ class Type(ABC):
     def less(self, right: "Type") -> "Type":
         raise EoTypeErrorResult(self, right)
 
+    def grtre(self, right: "Type") -> "Type":
+        raise EoTypeErrorResult(self, right)
+
+    def lesse(self, right: "Type") -> "Type":
+        raise EoTypeErrorResult(self, right)
+
     def negate(self) -> "Type":
         raise EoTypeErrorResult(self)
 

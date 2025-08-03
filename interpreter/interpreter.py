@@ -1,5 +1,5 @@
-from eotypes.callable import Callable, make_fn
-from error.error import EoTypeError, LoopBreak, LoopContinue
+from eotypes.callable import Callable, EoFunction, make_fn
+from error.error import EoTypeError, FnReturn, LoopBreak, LoopContinue
 from interpreter.environment import Environment
 from parser.nodes.expr.base import Expr, ExprVisitor
 from parser.nodes.stmt.base import Stmt, StmtVisitor
@@ -28,7 +28,7 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
 
     def run(self):
         for tree in self.trees:
-            return self.eval_stmt(tree)
+            self.eval_stmt(tree)
 
     """ Evals """
 
@@ -51,7 +51,15 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
         self.eval_block(e.stmts)
 
     def if_stmt(self, e: IfStmt):
-        raise Exception()
+        if self.is_truthy(self.eval_expr(e.cond)):
+            return self.eval_block(e.if_true)
+
+        for cond, if_true in e.elifs:
+            if self.is_truthy(self.eval_expr(cond)):
+                return self.eval_block(if_true)
+
+        if e.els:
+            return self.eval_block(e.els)
 
     def while_stmt(self, e: WhileStmt):
         while self.is_truthy(self.eval_expr(e.cond)):
@@ -72,11 +80,19 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
             case "continue":
                 raise LoopContinue()
 
-    def ret_stmt(self, e: RetStmt):
-        raise Exception()
+    def return_stmt(self, e: ReturnStmt):
+        val = self.eval_expr(e.val) if e.val != None else Nil()
+        raise FnReturn(val)
 
-    def function(self, e: Function):
-        raise Exception()
+    def fn_decl(self, e: FunctionDecl):
+        name = e.name.data
+        params = [token.data for token in e.params]
+        opt_params: list[tuple[str, Type]] = [
+            (token.data, self.eval_expr(expr)) for token, expr in e.opt_params
+        ]
+        block = e.block
+
+        self.env.define(name, EoFunction(name, params, opt_params, block, self))
 
     def use_stmt(self, e: UseStmt):
         raise Exception()
@@ -113,9 +129,9 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
                 case TType.Less:
                     return left.less(right)
                 case TType.GreaterEq:
-                    return left.grtr(right) or left.equals(right)
+                    return left.grtre(right)
                 case TType.LessEq:
-                    return left.less(right) or left.equals(right)
+                    return left.lesse(right)
 
         except EoTypeErrorResult as err:
             raise err.with_lf(e.op)
@@ -154,7 +170,7 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
 
         self.eval_expr(e.right)
 
-    def call(self, e: Call):
+    def call(self, e: Call) -> Type:
         callee = self.eval_expr(e.func)
 
         if not isinstance(callee, Callable):
@@ -165,7 +181,7 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
             (token.data, self.eval_expr(expr)) for token, expr in e.named_args
         )
 
-        callee.call(e.paren, args, named_args)
+        return callee.call(e.paren, args, named_args)
 
     def if_expr(self, e: IfExpr) -> Type:
         if self.is_truthy(self.eval_expr(e.cond)):
@@ -200,7 +216,7 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
 
     """ Util """
 
-    def eval_block(self, stmts: list[Stmt], env: Environment | None = None):
+    def eval_block(self, stmts: list[Stmt], env: Environment | None = None) -> Type:
         """Pass in an `env` because for functions, they need to declare their parameters"""
         prev = self.env
         try:  # for 'return', 'break' etc.
@@ -209,6 +225,8 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
             for stmt in stmts:
                 if isinstance(stmt, ExprStmt):
                     out = self.eval_expr(stmt.expr)
+                else:
+                    self.eval_stmt(stmt)
         finally:
             self.env = prev
 

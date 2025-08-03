@@ -85,13 +85,13 @@ class LoopFlow(Stmt):
         return v.loop_flow(self)
 
 
-class RetStmt(Stmt):
+class ReturnStmt(Stmt):
     def __init__(self, ret: Token, val: Expr | None = None):
         self.token = ret
         self.val = val
 
     def visit(self, v: StmtVisitor):
-        return v.ret_stmt(self)
+        return v.return_stmt(self)
 
 
 class ParamType(Enum):
@@ -99,7 +99,7 @@ class ParamType(Enum):
     Optional = "optional"
 
 
-class Function(Stmt):
+class FunctionDecl(Stmt):
     def __init__(
         self,
         name: Token,
@@ -118,7 +118,7 @@ class Function(Stmt):
         self.block = block
 
     def visit(self, v: StmtVisitor):
-        return v.function(self)
+        return v.fn_decl(self)
 
 
 class UseStmt(Stmt):

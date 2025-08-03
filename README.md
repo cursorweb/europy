@@ -17,11 +17,18 @@ This is **NOT** a replacement for Europa, nor is it a rewrite. This is just for 
     }
     add(1, 2, 3);
     ```
-    No longer *need* to name optional arguments (e.g. `c = 3`). You can, however, they must come after unnamed (positional) arguments.
+    No longer *need* to name optional arguments (e.g. `c = 3`). You can, however, they must come after unnamed (positional) arguments. Function binding is now very similar to python's strategy.
     
     Also, you can't have duplicate parameters. This no longer works:
     ```
     fn dup(a, a) {}
+    ```
+* Function printing
+    ```
+    use io.println;
+    println(println); // <builtin fn> instead of <Native Fn>
+    fn a() {}
+    println(a); // <fn a> instead of <User Fn a>
     ```
 * Module strategy: imported modules need to have a `mod` statement (or something similar) as the first statement, and they may not run code. Then, whenever a file is referenced, load it in. And then execute the main file.
 
