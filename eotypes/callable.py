@@ -52,10 +52,11 @@ class Callable(Type, ABC):
 
         Let pos_arity = len(params), total_arity = len(params) + len(opt_params)
         1. Check correct arity
-        2. Initialize bound_args with default values
-        3. Assign all positional arguments (x > pos_arity is an opt_param) to the bound dict
-        4. Assign all named arguments by setting the map. Check to make sure that no argument is *re-assigned*
-        5. Check to make sure that there are no extraneous arguments
+        2. Assign all positional arguments (x > pos_arity is an opt_param) to the bound dict
+        3. Assign all named arguments by setting the map. Check to make sure that no argument is *re-assigned*
+        4. Assign default values to any remaining args that don't exist on bound_args
+        5. Check to make sure that no positional args are missing
+        6. Check to make sure that there are no extraneous arguments
         """
         # check correct arity:
         total_args = len(pos_args) + len(named_args)
@@ -66,9 +67,6 @@ class Callable(Type, ABC):
             )
 
         bound_args: dict[str, Type] = {}
-
-        for name, value in self.opt_params:
-            bound_args[name] = value
 
         params = self.params
         opt_params = self.opt_params
@@ -85,15 +83,20 @@ class Callable(Type, ABC):
                 name, _ = opt_params[idx]
                 bound_args[name] = value
 
-        # assign all named args
+        # assign all named args, check no argument is reassigned
         for name, value in named_args.items():
             if not name in bound_args:
                 bound_args[name] = value
             else:
                 raise EoRuntimeError(paren.lf, f"Duplicate argument '{name}'.")
 
+        # assign all default values that haven't been initialized yet
+        for name, value in self.opt_params:
+            if not name in bound_args:
+                bound_args[name] = value
+
+        # check that no required params are missing:
         for param in self.params:
-            # check that no required params are missing:
             if not param in bound_args:
                 raise EoRuntimeError(
                     paren.lf, f"Missing argument for parameter '{param}'."
@@ -102,7 +105,7 @@ class Callable(Type, ABC):
         # check that no extraneous params are present:
         for name in bound_args:
             if name not in param_names:
-                raise EoRuntimeError(paren.lf, f"Unexpected named argument '{param}'.")
+                raise EoRuntimeError(paren.lf, f"Unexpected named argument '{name}'.")
 
         return bound_args
 
@@ -141,10 +144,11 @@ class EoFunction(Callable):
         self.val = f"<fn {name}>"
         self.block = block
         self.interpreter = interpreter
+        self.closure = interpreter.env
 
     def exec(self, args: dict[str, Type]) -> Type:
         interpreter = self.interpreter
-        env = Environment(interpreter.globals)
+        env = Environment(self.closure)
         for arg, val in args.items():
             env.define(arg, val)
 

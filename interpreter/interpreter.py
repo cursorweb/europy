@@ -100,7 +100,12 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
     """ Expr """
 
     def assign(self, e: Assign):
+        value = self.eval_expr(e.value)
 
+        if e.scope != None:
+            self.env.assign_at(e.name, value, e.scope)
+        else:
+            self.env.assign(e.name, value)
         return Nil()
 
     def binary(self, e: Binary):
@@ -153,7 +158,10 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
                 raise Exception("unreachable")
 
     def variable(self, e: Variable):
-        return self.env.get(e.name)
+        if e.scope != None:
+            return self.env.get_at(e.name, e.scope)
+        else:
+            return self.globals.get(e.name)
 
     def block_expr(self, e: BlockExpr):
         return self.eval_block(e.stmts)

@@ -1,6 +1,25 @@
-fn fib(n) {
-    if n <= 1 {return n;}
-    return fib(n - 2) + fib(n - 1);
+/*
+fn makeCounter() {
+  var i = 0;
+  fn count() {
+    i += 1;
+    print(i);
+  }
+
+  return count;
 }
 
-print(fib(3))
+var counter = makeCounter();
+counter(); // "1".
+counter(); // "2".
+*/
+
+var a = 5;
+{
+fn showA() {
+    print(a);
+}
+showA();
+var a = 6;
+showA();
+}

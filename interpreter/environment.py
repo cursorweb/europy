@@ -35,15 +35,24 @@ class Environment:
     def define(self, name: str, value: Type):
         self.values[name] = value
 
-    def get(self, token: Token):
+    def get_at(self, token: Token, scope: int) -> Type:
+        name = token.data
+        return self.ancestor(scope).values[name]
+
+    def get(self, token: Token) -> Type:
         name = token.data
         if name in self.values:
             return self.values[name]
 
-        if self.parent:
-            return self.parent.get(token)
+        assert not self.parent
+        # if self.parent:
+        #     return self.parent.get(token)
 
         raise EoRuntimeError(token.lf, f"Undefined variable '{name}'.")
+
+    def assign_at(self, token: Token, value: Type, scope: int):
+        name = token.data
+        self.ancestor(scope).values[name] = value
 
     def assign(self, token: Token, value: Type):
         name = token.data
@@ -51,7 +60,15 @@ class Environment:
             self.values[name] = value
             return
 
-        if self.parent:
-            return self.parent.assign(token, value)
+        assert not self.parent
+        # if self.parent:
+        #     return self.parent.assign(token, value)
 
         raise EoRuntimeError(token.lf, f"Undefined variable '{name}'.")
+
+    def ancestor(self, scope: int) -> "Environment":
+        env = self
+        for _ in range(scope):
+            assert env.parent
+            env = env.parent
+        return env

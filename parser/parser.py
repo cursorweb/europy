@@ -451,11 +451,8 @@ class Parser:
         raise err
 
     def synchronize(self):
+        self.next()  # eat the offending token, otherwise it'll keep causing an error
         while not self.is_end():
-            if self.prev().ttype == TType.Semi:
-                # we want to make sure the semicolon is consumed
-                return
-
             # these guys match the start of a statement probably
             # so don't eat them!
             match self.peek().ttype:
@@ -469,7 +466,12 @@ class Parser:
                 ):
                     return
 
+            # otherwise eat the offending token
             self.next()
+
+            if self.prev().ttype == TType.Semi:
+                # we want to make sure the semicolon is consumed
+                return
 
     """ Pos """
 

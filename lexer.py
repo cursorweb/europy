@@ -232,8 +232,8 @@ class Lexer:
                     while self.peek() != "\n" and self.is_valid():
                         self.next()
                 elif self.match("*"):
-                    while self.is_valid() and (
-                        self.peek() != "*" and self.peek(1) != "/"
+                    while self.is_valid() and not (
+                        self.peek() == "*" and self.peek(2) == "/"
                     ):
                         if self.peek() == "\n":
                             self.newline()
