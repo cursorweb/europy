@@ -137,7 +137,7 @@ class Set(Expr):
 
 
 class Prop(Expr):
-    """<mod>.<func>"""
+    """`<mod>.<func>`"""
 
     def __init__(self, mod: Expr, name: Token):
         self.mod = mod
