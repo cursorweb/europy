@@ -1,7 +1,7 @@
 {
     // var a = "works";
-    fun get_a() {
-        print a;
+    fn get_a() {
+        println(a);
         /*    ^ a *should* be looking for the variable on the global side
                 and bypass all the braces entirely! */
     }

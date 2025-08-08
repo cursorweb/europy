@@ -1,15 +1,5 @@
-
-var a = 5;
-var showA;
-
-{
-    // var a = 7;
-    /* prints 7 or 5 but shouldn't error */
-    fn temp() {
-        print(a);
-    }
-
-    showA = temp;
+fn fact(n) {
+    if n > 1 { n * fact(n - 1) } else { 1 }
 }
 
-showA();
+print(fact(4))

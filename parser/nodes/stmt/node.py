@@ -1,11 +1,10 @@
-from typing import Literal
 from enum import Enum
 from ..expr.base import Expr
 from .base import Stmt, StmtVisitor
 
 from tokens import Token
 
-
+# todo: remove statements
 """
 class (Stmt):
     def __init__(self, ):
@@ -30,68 +29,6 @@ class VarDecl(Stmt):
 
     def visit(self, v: StmtVisitor):
         return v.var_decl(self)
-
-
-class BlockStmt(Stmt):
-    def __init__(self, stmts: list[Stmt]):
-        self.stmts = stmts
-
-    def visit(self, v: StmtVisitor):
-        return v.block_stmt(self)
-
-
-class IfStmt(Stmt):
-    def __init__(
-        self,
-        cond: Expr,
-        if_true: list[Stmt],
-        elifs: list[tuple[Expr, list[Stmt]]],
-        els: list[Stmt] | None = None,
-    ):
-        self.cond = cond
-        self.if_true = if_true
-        self.elifs = elifs
-        self.els = els
-
-    def visit(self, v: StmtVisitor):
-        return v.if_stmt(self)
-
-
-class WhileStmt(Stmt):
-    def __init__(self, cond: Expr, loop: list[Stmt]):
-        self.cond = cond
-        self.block = loop
-
-    def visit(self, v: StmtVisitor):
-        return v.while_stmt(self)
-
-
-class ForStmt(Stmt):
-    def __init__(self, name: str, iterator: Expr, block: list[Stmt]) -> None:
-        self.name = name
-        self.iter = iterator
-        self.block = block
-
-    def visit(self, v: StmtVisitor):
-        return v.for_stmt(self)
-
-
-class LoopFlow(Stmt):
-    def __init__(self, token: Token, type: Literal["break", "continue"]):
-        self.token = token
-        self.type = type
-
-    def visit(self, v: StmtVisitor):
-        return v.loop_flow(self)
-
-
-class ReturnStmt(Stmt):
-    def __init__(self, ret: Token, val: Expr | None = None):
-        self.token = ret
-        self.val = val
-
-    def visit(self, v: StmtVisitor):
-        return v.return_stmt(self)
 
 
 class ParamType(Enum):

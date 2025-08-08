@@ -19,12 +19,20 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
         self.trees = tree
         self.globals = Environment()
         self.env = self.globals
+        """
+        Note how we need both globals end env.
+        If we just had env, which I think the old rust version had,
+        the problem would have become that when you become nested, the resolver wants you to look globally.
+        But there is no global, and so you'd just keep looking in your current environment/keep backtracking to your parent environment.
+        That'll still get you the same error or something else entirely.
+        """
 
         def fn(dict):
             print(dict["name"].to_string())
             return Nil()
 
         self.globals.define("print", make_fn(["name"], [], fn))
+        self.globals.define("println", make_fn(["name"], [], fn))
 
     def run(self):
         for tree in self.trees:
@@ -41,16 +49,15 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
     """ Stmt """
 
     def expr_stmt(self, e: ExprStmt):
-        return self.eval_expr(e.expr)
+        self.eval_expr(e.expr)
 
     def var_decl(self, e: VarDecl):
         for name, expr in e.decls:
             self.env.define(name, self.eval_expr(expr))
 
-    def block_stmt(self, e: BlockStmt):
-        self.eval_block(e.stmts)
+    """ Expr like """
 
-    def if_stmt(self, e: IfStmt):
+    def if_expr(self, e: IfExpr):
         if self.is_truthy(self.eval_expr(e.cond)):
             return self.eval_block(e.if_true)
 
@@ -61,7 +68,9 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
         if e.els:
             return self.eval_block(e.els)
 
-    def while_stmt(self, e: WhileStmt):
+        return Nil()
+
+    def while_expr(self, e: WhileExpr):
         while self.is_truthy(self.eval_expr(e.cond)):
             try:
                 self.eval_block(e.block)
@@ -70,7 +79,7 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
             except LoopContinue:
                 pass
 
-    def for_stmt(self, e: ForStmt):
+    def for_expr(self, e: ForExpr):
         raise Exception()
 
     def loop_flow(self, e: LoopFlow):
@@ -80,7 +89,7 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
             case "continue":
                 raise LoopContinue()
 
-    def return_stmt(self, e: ReturnStmt):
+    def return_expr(self, e: ReturnExpr):
         val = self.eval_expr(e.val) if e.val != None else Nil()
         raise FnReturn(val)
 
@@ -106,6 +115,7 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
             self.env.assign_at(e.name, value, e.scope)
         else:
             self.globals.assign(e.name, value)
+
         return Nil()
 
     def binary(self, e: Binary):
@@ -190,19 +200,6 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
         )
 
         return callee.call(e.paren, args, named_args)
-
-    def if_expr(self, e: IfExpr) -> Type:
-        if self.is_truthy(self.eval_expr(e.cond)):
-            return self.eval_block(e.if_true)
-
-        for cond, if_true in e.elifs:
-            if self.is_truthy(self.eval_expr(cond)):
-                return self.eval_block(if_true)
-
-        if e.els:
-            return self.eval_block(e.els)
-
-        return Nil()
 
     def get(self, e: Get):
         raise Exception()

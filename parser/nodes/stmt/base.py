@@ -16,31 +16,6 @@ class StmtVisitor(ABC):
         raise Exception()
 
     @abstractmethod
-    def block_stmt(self, e: "BlockStmt"):
-        raise Exception()
-
-    @abstractmethod
-    def if_stmt(self, e: "IfStmt"):
-        raise Exception()
-
-    @abstractmethod
-    def while_stmt(self, e: "WhileStmt"):
-        raise Exception()
-
-    @abstractmethod
-    def for_stmt(self, e: "ForStmt"):
-        raise Exception()
-
-    @abstractmethod
-    # break and continue
-    def loop_flow(self, e: "LoopFlow"):
-        raise Exception()
-
-    @abstractmethod
-    def return_stmt(self, e: "ReturnStmt"):
-        raise Exception()
-
-    @abstractmethod
     def fn_decl(self, e: "FunctionDecl"):
         raise Exception()
 

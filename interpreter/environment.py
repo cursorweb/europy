@@ -30,7 +30,7 @@ class Environment:
         The resolver doesn't see that, so it will still try to access inc, which no longer exists.
         """
         self.parent = parent
-        self.values = {}
+        self.values: dict[str, Type] = {}
 
     def define(self, name: str, value: Type):
         self.values[name] = value

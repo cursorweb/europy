@@ -92,10 +92,7 @@ class Resolver(ExprVisitor, StmtVisitor):
             self.rexpr(val)
             self.define(name)
 
-    def block_stmt(self, e: BlockStmt):
-        self.rblock(e.stmts)
-
-    def if_stmt(self, e: IfStmt):
+    def if_expr(self, e: IfExpr):
         self.rexpr(e.cond)
         self.rblock(e.if_true)
         for cond, if_true in e.elifs:
@@ -104,13 +101,13 @@ class Resolver(ExprVisitor, StmtVisitor):
         if e.els:
             self.rblock(e.els)
 
-    def while_stmt(self, e: WhileStmt):
+    def while_expr(self, e: WhileExpr):
         self.rexpr(e.cond)
         self.loop_depth += 1
         self.rblock(e.block)
         self.loop_depth -= 1
 
-    def for_stmt(self, e: ForStmt):
+    def for_expr(self, e: ForExpr):
         raise Exception()
 
     def loop_flow(self, e: LoopFlow):
@@ -119,7 +116,7 @@ class Resolver(ExprVisitor, StmtVisitor):
                 e.token.lf, f"{e.type} statements can only be used inside loops"
             )
 
-    def return_stmt(self, e: ReturnStmt):
+    def return_expr(self, e: ReturnExpr):
         if self.fn_depth == 0:
             raise EoSyntaxError(
                 e.token.lf, "Return statements can only be inside functions"
@@ -205,15 +202,6 @@ class Resolver(ExprVisitor, StmtVisitor):
             self.rexpr(arg)
         for _, arg in e.named_args:
             self.rexpr(arg)
-
-    def if_expr(self, e: IfExpr):
-        self.rexpr(e.cond)
-        self.rblock(e.if_true)
-        for cond, if_true in e.elifs:
-            self.rexpr(cond)
-            self.rblock(if_true)
-        if e.els:
-            self.rblock(e.els)
 
     def get(self, e: Get):
         raise Exception()

@@ -2,35 +2,35 @@ program => statement* EOF
 
 
 # statements
-statement => exprStmt 
+statement => exprStmt
            | varDecl
-           | block
-           | ifStmt
-           | whileStmt
-           | doWhileStmt
-           | forStmt
-           | breakStmt
-           | continueStmt
            | fnDecl
-           | returnStmt
            | useStmt
 
-exprStmt => ( expr ";" )
 varDecl => "var" IDENTIFIER ("=" expr )? ( "," IDENTIFIER ("=" expr )? )* ";"
-
-ifStmt => "if" expr block ( "elif" expr block )* ( "else" block )?
-
-whileStmt => "while" expr? block
-doWhileStmt => "do" block "while" expr ";"
-forStmt => "for" ( IDENTIFIER "in" expr ) block
-
-breakStmt => "break" ";"        # todo: "break" expr ";"
-continueStmt => "continue" ";"
-
 fnDecl => "fn" IDENTIFIER function
-returnStmt => "return" expr? ";"
-
 useStmt => "use" IDENTIFIER ( "." ( ( "{" ( IDENTIFIER "," )* IDENTIFIER "}" ) | IDENTIFIER | "*" ) ) ";"
+
+exprStmt => expr ";" | exprLike
+exprLike => block
+          | ifExpr
+          | whileExpr
+          | dowhileExpr
+          | forExpr
+          | breakExpr
+          | continueExpr
+          | returnExpr
+
+
+ifExpr => "if" expr block ( "elif" expr block )* ( "else" block )?
+
+whileExpr => "while" expr? block
+dowhileExpr => "do" block "while" expr ";"
+forExpr => "for" "(" IDENTIFIER "in" expr ")" block
+
+breakExpr => "break" ";"        # todo: "break" expr ";"
+continueExpr => "continue" ";"
+returnExpr => "return" expr? ";"
 
 
 # expressions
@@ -52,7 +52,16 @@ times => unary ( ( "*" | "/" | "%" ) unary )*
 unary => ( ( "!" | "-" ) unary ) | call
 call => primary ( "(" args? ")" | "[" expr "]" | "." IDENTIFIER )*
 
-primary => NUMBER | STRING | IDENTIFIER | "true" | "false" | "nil" | "(" expr ")" | block | ifStmt | array | maps
+primary => NUMBER
+         | STRING
+         | IDENTIFIER
+         | "true"
+         | "false"
+         | "nil"
+         | "(" expr ")"
+         | array
+         | maps
+         | exprLike
 
 block => "{" statement* "}"
 array => "[" ( expr "," )* ( expr )? "]"
@@ -67,3 +76,4 @@ function => "(" params? ")" block
 IDENTIFIER => [ _ a-z A-Z ]? [ _ a-z A-Z 0-9 ]*
 NUMBER => [ 0-9 _ ]+ ( "." [ 0-9 _ ]+ )?
 STRING => ( "\"" ( [ ^"\"" ]+ ) "\"" ) | ( "'" ( [ ^"'" ]+ ) "'" ) | ( "`"+ ( [ ^"`"+ ]+ ) "`"+ )
+";" => SEMICOLON | RIGHT_BRACE | EOF

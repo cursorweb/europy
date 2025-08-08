@@ -1,12 +1,20 @@
 // use io.println;
 
-fn makeCounter() {
+fn makeCounter(name = "counter") {
     var count = 0;
     fn inc() {
         count += 1;
+        println(name + ": " + count);
     }
+
     return inc;
 }
 
 var c = makeCounter();
 c();
+c();
+
+var c2 = makeCounter(name = "counter 2");
+c2();
+c();
+c2();

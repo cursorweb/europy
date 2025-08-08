@@ -31,27 +31,6 @@ class Printer(ExprVisitor, StmtVisitor):
             out.append(f"{decl[0]} = {decl[1].visit(self)}")
         return f"var {', '.join(out)};"
 
-    def if_stmt(self, e: "IfStmt"):
-        out = f"if {self.eval_expr(e.cond)} {self.print_block(e.if_true)}"
-        for cond, if_true in e.elifs:
-            out += f" elif {self.eval_expr(cond)} {self.print_block(if_true)}"
-        if e.els:
-            out += f" else {self.print_block(e.els)}"
-        return out
-
-    def while_stmt(self, e):
-        return f"while {self.eval_expr(e.cond)} {self.print_block(e.block)}"
-
-    def for_stmt(self, e):
-        pass
-
-    def loop_flow(self, e):
-        return f"{e.type};"
-
-    def return_stmt(self, e):
-        out = f" {self.eval_expr(e.val)}" if e.val else ""
-        return f"return{out};"
-
     def fn_decl(self, e):
         opt_params = ", " if len(e.params) and len(e.opt_params) else ""
         opt_params += ", ".join(
@@ -62,8 +41,28 @@ class Printer(ExprVisitor, StmtVisitor):
     def use_stmt(self, e):
         pass
 
-    def block_stmt(self, e):
-        return f"{self.print_block(e.stmts)}"
+    """ expr like """
+
+    def if_expr(self, e: "IfExpr"):
+        out = f"if {self.eval_expr(e.cond)} {self.print_block(e.if_true)}"
+        for cond, if_true in e.elifs:
+            out += f" elif {self.eval_expr(cond)} {self.print_block(if_true)}"
+        if e.els:
+            out += f" else {self.print_block(e.els)}"
+        return out
+
+    def while_expr(self, e):
+        return f"while {self.eval_expr(e.cond)} {self.print_block(e.block)}"
+
+    def for_expr(self, e):
+        pass
+
+    def loop_flow(self, e):
+        return f"{e.type}"
+
+    def return_expr(self, e):
+        out = f" {self.eval_expr(e.val)}" if e.val else ""
+        return f"return{out}"
 
     """ expr """
 
@@ -98,9 +97,6 @@ class Printer(ExprVisitor, StmtVisitor):
             [f"{tok.data} = {self.eval_expr(arg)}" for tok, arg in e.named_args]
         )
         return f"{self.eval_expr(e.func)}({args}{named_args})"
-
-    def if_expr(self, e: "IfExpr"):
-        return self.if_stmt(cast(IfStmt, e))
 
     def get(self, e: "Get"):
         pass

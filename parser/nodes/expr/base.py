@@ -13,6 +13,31 @@ T = TypeVar("T")
 # things like interpreter, resolver will 'implement' this
 class ExprVisitor(ABC, Generic[T]):
     @abstractmethod
+    def block_expr(self, e: "BlockExpr") -> T:
+        raise Exception()
+
+    @abstractmethod
+    def if_expr(self, e: "IfExpr") -> T:
+        raise Exception()
+
+    @abstractmethod
+    def while_expr(self, e: "WhileExpr") -> T:
+        raise Exception()
+
+    @abstractmethod
+    def for_expr(self, e: "ForExpr") -> T:
+        raise Exception()
+
+    @abstractmethod
+    # break and continue
+    def loop_flow(self, e: "LoopFlow") -> T:
+        raise Exception()
+
+    @abstractmethod
+    def return_expr(self, e: "ReturnExpr") -> T:
+        raise Exception()
+
+    @abstractmethod
     def assign(self, e: "Assign") -> T:
         raise Exception()
 
@@ -37,19 +62,11 @@ class ExprVisitor(ABC, Generic[T]):
         raise Exception()
 
     @abstractmethod
-    def block_expr(self, e: "BlockExpr") -> T:
-        raise Exception()
-
-    @abstractmethod
     def logical(self, e: "Logical") -> T:
         raise Exception()
 
     @abstractmethod
     def call(self, e: "Call") -> T:
-        raise Exception()
-
-    @abstractmethod
-    def if_expr(self, e: "IfExpr") -> T:
         raise Exception()
 
     @abstractmethod

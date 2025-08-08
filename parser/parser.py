@@ -34,34 +34,57 @@ class Parser:
     """ Stmt """
 
     def stmt(self) -> StmtT:
-        if self.match(TType.If):
-            return Stmt.IfStmt(*self.if_stmt())
-
         if self.match(TType.Var):
             return self.var_decl()
 
         if self.match(TType.Fn):
             return self.fn_decl()
 
-        if self.match(TType.While):
-            return self.while_stmt()
-
-        if self.match(TType.Do):
-            return self.dowhile_stmt()
-
-        if self.match(TType.For):
-            return self.for_stmt()
-
-        if self.match(TType.LeftBrace):
-            return Stmt.BlockStmt(self.block())
-
-        if self.match(TType.Break, TType.Continue, TType.Return):
-            return self.controlflow_stmt()
-
         if self.match(TType.Use):
-            pass
+            raise Exception()
 
         return self.expr_stmt()
+
+    def expr_stmt(self) -> StmtT:
+        expr = self.expr_like()
+        if expr == None:
+            expr = self.expr()
+            self.consume_semi("Expected ';' after expression.")
+
+        return Stmt.ExprStmt(expr)
+        # expr = self.expr()
+
+        # if not self.match(TType.Semi):
+        #     semi = self.peek()
+        #     print(semi.ttype)
+        #     # feature: last statement doesn't need semi (repl purposes probably)
+        #     if semi.ttype != TType.RightBrace and semi.ttype != TType.EOF:
+        #         self.report_err(semi, "Expected ';' after statement.")
+
+        # return Stmt.ExprStmt(expr)
+
+    def expr_like(self) -> ExprT | None:
+        if self.match(TType.If):
+            return Expr.IfExpr(*self.if_stmt())
+
+        if self.match(TType.While):
+            return self.while_expr()
+
+        if self.match(TType.Do):
+            return self.dowhile_expr()
+
+        if self.match(TType.For):
+            return self.for_expr()
+
+        if self.match(TType.LeftBrace):
+            return Expr.BlockExpr(self.block())
+
+        if self.match(TType.Break, TType.Continue, TType.Return):
+            return self.controlflow_expr()
+
+        return None
+
+    """ Expr Like """
 
     def if_stmt(
         self,
@@ -147,7 +170,7 @@ class Parser:
 
         return Stmt.FunctionDecl(name, params, opt_params, stmts)
 
-    def while_stmt(self) -> StmtT:
+    def while_expr(self) -> ExprT:
         cond: ExprT
         if self.match(TType.LeftBrace):
             cond = Expr.LiteralVal(eotypes.Bool(True))
@@ -157,31 +180,36 @@ class Parser:
             self.consume(TType.LeftBrace, "Expected '{' after while loop condition.")
             body = self.block()
 
-        return Stmt.WhileStmt(cond, body)
+        return Expr.WhileExpr(cond, body)
 
-    def dowhile_stmt(self) -> StmtT:
+    def dowhile_expr(self) -> ExprT:
         tok = self.consume(TType.LeftBrace, "Expected '{' after do keyword.")
         body = self.block()
         self.consume(TType.While, "Expected 'while' after do loop body.")
         cond = self.expr()
         self.consume(TType.Semi, "Expected ';' after do while loop condition.")
 
-        return Stmt.WhileStmt(
+        return Expr.WhileExpr(
             Expr.LiteralVal(eotypes.Bool(True)),
-            [*body, Stmt.IfStmt(cond, [Stmt.LoopFlow(tok, "break")], [])],
+            [
+                *body,
+                Stmt.ExprStmt(
+                    Expr.IfExpr(cond, [Stmt.ExprStmt(Expr.LoopFlow(tok, "break"))], [])
+                ),
+            ],
         )
 
-    def for_stmt(self) -> StmtT:
+    def for_expr(self) -> ExprT:
         ident = self.consume(TType.Identifier, "Expected variable after 'for'.")
         self.consume(TType.In, "Expected 'in' after variable name")
         iterator = self.expr()
         block = self.block()
 
-        return Stmt.ForStmt(ident.data, iterator, block)
+        return Expr.ForExpr(ident.data, iterator, block)
 
     def block(self) -> list[StmtT]:
         """Make sure to consume '{'"""
-        stmts = []
+        stmts: list[StmtT] = []
 
         while not self.check(TType.RightBrace) and not self.is_end():
             stmts.append(self.stmt())
@@ -190,35 +218,24 @@ class Parser:
 
         return stmts
 
-    def controlflow_stmt(self) -> StmtT:
+    def controlflow_expr(self) -> ExprT:
         tok = self.prev()
-        stmt: StmtT
+        expr: ExprT
 
         if tok.ttype == TType.Break:
-            stmt = Stmt.LoopFlow(tok, "break")
+            expr = Expr.LoopFlow(tok, "break")
         elif tok.ttype == TType.Continue:
-            stmt = Stmt.LoopFlow(tok, "continue")
+            expr = Expr.LoopFlow(tok, "continue")
         elif tok.ttype == TType.Return:
             val = None
-            if not self.get(TType.Semi):
+            if not self.match(TType.Semi):
                 val = self.expr()
-            stmt = Stmt.ReturnStmt(tok, val)
+            expr = Expr.ReturnExpr(tok, val)
         else:
             raise Exception("unreachable")
 
         self.consume(TType.Semi, "Expected ';' after control flow")
-        return stmt
-
-    def expr_stmt(self) -> StmtT:
-        expr = self.expr()
-
-        if not self.match(TType.Semi):
-            semi = self.peek()
-            # feature: last statement doesn't need semi (repl purposes probably)
-            if semi.ttype != TType.RightBrace and semi.ttype != TType.EOF:
-                self.report_err(semi, "Expected ';' after statement.")
-
-        return Stmt.ExprStmt(expr)
+        return expr
 
     """ Expr """
 
@@ -355,7 +372,7 @@ class Parser:
                 if (
                     not seen_named_args
                     and self.check(TType.Identifier)
-                    and self.check(TType.Eq, 1)
+                    and self.check(TType.Eq, n=1)
                 ):
                     seen_named_args = True
 
@@ -416,31 +433,39 @@ class Parser:
 
     """ Utils """
 
-    def get(self, *ttypes: TType):
-        for ttype in ttypes:
-            if self.check(ttype):
-                self.next()
-                return True
+    def check_semi(self) -> bool:
+        """Check if a terminator: ;, etc. is present (don't eat)"""
+        return self.check(TType.Semi, TType.RightBrace, TType.EOF)
 
-        return False
+    def consume_semi(self, msg: str):
+        """Get terminator, or throw error"""
+        if self.match(TType.Semi):
+            return
 
-    def match(self, *types: TType):
+        if self.check(TType.RightBrace, TType.EOF):
+            return
+
+        self.report_err(self.peek(), msg)
+
+    def match(self, *ttypes: TType):
         """if it matches, consume it, otherwise do nothing"""
-        for type in types:
+        for type in ttypes:
             if self.check(type):
                 self.next()
                 return True
 
         return False
 
-    def check(self, type: TType, n=0):
-        """Check if the current (unconsumed) token is the ttype we want"""
-        if self.is_end():
-            return False
-        return self.peek(n).ttype == type
+    def check(self, *ttypes: TType, n=0):
+        """Check if the current (unconsumed) token is the ttype we want, doesn't eat it"""
+        for ttype in ttypes:
+            if self.peek(n).ttype == ttype:
+                return True
 
-    def consume(self, token: TType, msg: str):
-        if self.check(token):
+        return False
+
+    def consume(self, ttype: TType, msg: str):
+        if self.check(ttype):
             return self.next()
 
         self.report_err(self.peek(), msg)
