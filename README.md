@@ -11,7 +11,7 @@ This is **NOT** a replacement for Europa, nor is it a rewrite. This is just for 
     }
     ```
 * Function rework
-    ```
+    ```eo
     fn add(a, b, c = 5) {
         return a + b + c;
     }
@@ -24,12 +24,37 @@ This is **NOT** a replacement for Europa, nor is it a rewrite. This is just for 
     fn dup(a, a) {}
     ```
 * Function printing
-    ```
+    ```eo
     use io.println;
     println(println); // <builtin fn> instead of <Native Fn>
     fn a() {}
     println(a); // <fn a> instead of <User Fn a>
     ```
+* Strings. They now compare by length (although in the future, this may be alphanumerically, like 'a' < 'b')
+* Expressions. Everything is an expression now. So, these examples are possible:
+    ```eo
+    use io.println;
+
+    fn factorial(number) {
+        if n < 1 {
+            1
+        } else {
+            n * factorial(n - 1)
+        }
+    }
+
+    var sum_of_five = { // todo: add for loops and make this better!
+        var i = 0, sum = 0;
+        while i <= 5 {
+            sum += i;
+            i += 1
+        }
+        sum
+    };
+
+    println(sum_of_five)
+    ```
+    The rules are simple: you can omit a semicolon if it is there is a right brace or it is the end of file.
 * Module strategy: imported modules need to have a `mod` statement (or something similar) as the first statement, and they may not run code. Then, whenever a file is referenced, load it in. And then execute the main file.
 
 ## Motivation

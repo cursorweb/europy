@@ -1,5 +1,1 @@
-fn fact(n) {
-    if n > 1 { n * fact(n - 1) } else { 1 }
-}
-
-print(fact(4))
+var i = 0; (while i < 5 { i += 1});

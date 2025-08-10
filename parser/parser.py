@@ -45,69 +45,6 @@ class Parser:
 
         return self.expr_stmt()
 
-    def expr_stmt(self) -> StmtT:
-        expr = self.expr_like()
-        if expr == None:
-            expr = self.expr()
-            self.consume_semi("Expected ';' after expression.")
-
-        return Stmt.ExprStmt(expr)
-        # expr = self.expr()
-
-        # if not self.match(TType.Semi):
-        #     semi = self.peek()
-        #     print(semi.ttype)
-        #     # feature: last statement doesn't need semi (repl purposes probably)
-        #     if semi.ttype != TType.RightBrace and semi.ttype != TType.EOF:
-        #         self.report_err(semi, "Expected ';' after statement.")
-
-        # return Stmt.ExprStmt(expr)
-
-    def expr_like(self) -> ExprT | None:
-        if self.match(TType.If):
-            return Expr.IfExpr(*self.if_stmt())
-
-        if self.match(TType.While):
-            return self.while_expr()
-
-        if self.match(TType.Do):
-            return self.dowhile_expr()
-
-        if self.match(TType.For):
-            return self.for_expr()
-
-        if self.match(TType.LeftBrace):
-            return Expr.BlockExpr(self.block())
-
-        if self.match(TType.Break, TType.Continue, TType.Return):
-            return self.controlflow_expr()
-
-        return None
-
-    """ Expr Like """
-
-    def if_stmt(
-        self,
-    ) -> tuple[ExprT, list[StmtT], list[tuple[ExprT, list[StmtT]]], list[StmtT] | None]:
-        cond = self.expr()
-        self.consume(TType.LeftBrace, "Expected '{' after if statement condition.")
-        true_br = self.block()
-        elif_brs: list[tuple[ExprT, list[StmtT]]] = []
-        else_br = None
-
-        while self.match(TType.Elif):
-            elif_cond = self.expr()
-            self.consume(
-                TType.LeftBrace, "Expected '{' after elif statement condition."
-            )
-            elif_brs.append((elif_cond, self.block()))
-
-        if self.match(TType.Else):
-            self.consume(TType.LeftBrace, "Expected '{' after else keyword.")
-            else_br = self.block()
-
-        return (cond, true_br, elif_brs, else_br)
-
     def var_decl(self) -> StmtT:
         vars: list[tuple[str, ExprT]] = []
 
@@ -169,6 +106,57 @@ class Parser:
         stmts = self.block()
 
         return Stmt.FunctionDecl(name, params, opt_params, stmts)
+
+    def expr_stmt(self) -> StmtT:
+        expr = self.expr()
+        self.consume_semi("Expected ';' after expression.")
+
+        return Stmt.ExprStmt(expr)
+
+    def expr(self) -> ExprT:
+        if self.match(TType.If):
+            return Expr.IfExpr(*self.if_stmt())
+
+        if self.match(TType.While):
+            return self.while_expr()
+
+        if self.match(TType.Do):
+            return self.dowhile_expr()
+
+        if self.match(TType.For):
+            return self.for_expr()
+
+        if self.match(TType.LeftBrace):
+            return Expr.BlockExpr(self.block())
+
+        if self.match(TType.Break, TType.Continue, TType.Return):
+            return self.controlflow_expr()
+
+        return self.expr_noop()
+
+    """ Expr Like """
+
+    def if_stmt(
+        self,
+    ) -> tuple[ExprT, list[StmtT], list[tuple[ExprT, list[StmtT]]], list[StmtT] | None]:
+        cond = self.expr()
+        self.consume(TType.LeftBrace, "Expected '{' after if statement condition.")
+        true_br = self.block()
+        elif_brs: list[tuple[ExprT, list[StmtT]]] = []
+        else_br = None
+
+        while self.match(TType.Elif):
+            elif_cond = self.expr()
+            self.consume(
+                TType.LeftBrace, "Expected '{' after elif statement condition."
+            )
+            elif_brs.append((elif_cond, self.block()))
+
+        if self.match(TType.Else):
+            self.consume(TType.LeftBrace, "Expected '{' after else keyword.")
+            else_br = self.block()
+
+        return (cond, true_br, elif_brs, else_br)
 
     def while_expr(self) -> ExprT:
         cond: ExprT
@@ -239,7 +227,7 @@ class Parser:
 
     """ Expr """
 
-    def expr(self) -> ExprT:
+    def expr_noop(self) -> ExprT:
         return self.ternary()
 
     def ternary(self) -> ExprT:
