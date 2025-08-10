@@ -274,6 +274,8 @@ class Parser:
                         op = TType.Pow
                     case TType.ModEq:
                         op = TType.Mod
+                    case _:
+                        raise Exception("Unreachable")
 
                 expr = Expr.Assign(
                     name,
@@ -444,7 +446,7 @@ class Parser:
 
         return False
 
-    def check(self, *ttypes: TType, n=0):
+    def check(self, *ttypes: TType, n: int = 0):
         """Check if the current (unconsumed) token is the ttype we want, doesn't eat it"""
         for ttype in ttypes:
             if self.peek(n).ttype == ttype:
@@ -478,6 +480,8 @@ class Parser:
                     | TType.While
                 ):
                     return
+                case _:
+                    pass
 
             # otherwise eat the offending token
             self.next()
@@ -491,7 +495,7 @@ class Parser:
     def is_end(self):
         return self.peek().ttype == TType.EOF
 
-    def peek(self, n=0):
+    def peek(self, n: int = 0):
         return self.tokens[self.i + n]
 
     def prev(self):

@@ -35,6 +35,9 @@ class Type(ABC):
     def equals(self, right: "Type") -> "Type":
         return Bool(self.tname == right.tname and self.val == right.val)
 
+    def nequals(self, right: "Type") -> "Type":
+        return Bool(self.tname != right.tname and self.val != right.val)
+
     def grtr(self, right: "Type") -> "Type":
         raise EoTypeErrorResult(self, right)
 

@@ -1,12 +1,10 @@
-from typing import cast
-
 from parser.nodes import *
 
 TAB = "    "
 
 
 # quick debug
-class Printer(ExprVisitor, StmtVisitor):
+class Printer(ExprVisitor[str], StmtVisitor[str]):
     def __init__(self, tree: Stmt) -> None:
         self.tree = tree
         self.indent = 0
@@ -39,7 +37,7 @@ class Printer(ExprVisitor, StmtVisitor):
         return f"fn {e.name.data}({', '.join([tok.data for tok in e.params])}{opt_params}) {self.print_block(e.block)}"
 
     def use_stmt(self, e):
-        pass
+        raise Exception()
 
     """ expr like """
 
@@ -55,7 +53,7 @@ class Printer(ExprVisitor, StmtVisitor):
         return f"while {self.eval_expr(e.cond)} {self.print_block(e.block)}"
 
     def for_expr(self, e):
-        pass
+        raise Exception()
 
     def loop_flow(self, e):
         return f"{e.type}"
@@ -99,22 +97,22 @@ class Printer(ExprVisitor, StmtVisitor):
         return f"{self.eval_expr(e.func)}({args}{named_args})"
 
     def get(self, e: "Get"):
-        pass
+        raise Exception()
 
     def set(self, e: "Set"):
-        pass
+        raise Exception()
 
     def prop(self, e: "Prop"):
-        pass
+        raise Exception()
 
     def array(self, e: "Array"):
-        pass
+        raise Exception()
 
     def map(self, e: "Map"):
-        pass
+        raise Exception()
 
     def range(self, e: "Range"):
-        pass
+        raise Exception()
 
     def print_block(self, stmts: list[Stmt]):
         self.indent += 1

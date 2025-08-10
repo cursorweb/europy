@@ -27,7 +27,7 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
         That'll still get you the same error or something else entirely.
         """
 
-        def fn(dict):
+        def fn(dict: dict[str, Type]):
             print(dict["name"].to_string())
             return Nil()
 
@@ -41,7 +41,7 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
     """ Evals """
 
     def eval_stmt(self, e: Stmt):
-        return e.visit(self)
+        e.visit(self)
 
     def eval_expr(self, e: Expr) -> Type:
         return e.visit(self)
@@ -70,26 +70,32 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
 
         return Nil()
 
-    def while_expr(self, e: WhileExpr):
+    def while_expr(self, e: WhileExpr) -> Type:
+        out = Nil()
+
         while self.is_truthy(self.eval_expr(e.cond)):
             try:
-                self.eval_block(e.block)
+                out = self.eval_block(e.block)
             except LoopBreak:
                 break
             except LoopContinue:
                 pass
 
-    def for_expr(self, e: ForExpr):
+        return out
+
+    def for_expr(self, e: ForExpr) -> Type:
         raise Exception()
 
-    def loop_flow(self, e: LoopFlow):
+    def loop_flow(self, e: LoopFlow) -> Type:
         match e.type:
             case "break":
                 raise LoopBreak()
             case "continue":
                 raise LoopContinue()
+            case _:
+                raise Exception("Unreachable code")
 
-    def return_expr(self, e: ReturnExpr):
+    def return_expr(self, e: ReturnExpr) -> Type:
         val = self.eval_expr(e.val) if e.val != None else Nil()
         raise FnReturn(val)
 
@@ -108,7 +114,7 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
 
     """ Expr """
 
-    def assign(self, e: Assign):
+    def assign(self, e: Assign) -> Type:
         value = self.eval_expr(e.value)
 
         if e.scope != None:
@@ -118,7 +124,7 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
 
         return Nil()
 
-    def binary(self, e: Binary):
+    def binary(self, e: Binary) -> Type:
         left = self.eval_expr(e.left)
         right = self.eval_expr(e.right)
         try:
@@ -138,7 +144,7 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
                 case TType.EqEq:
                     return left.equals(right)
                 case TType.NotEq:
-                    return not left.equals(right)
+                    return left.nequals(right)
                 case TType.Greater:
                     return left.grtr(right)
                 case TType.Less:
@@ -147,6 +153,8 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
                     return left.grtre(right)
                 case TType.LessEq:
                     return left.lesse(right)
+                case _:
+                    raise Exception("Unreachable")
 
         except EoTypeErrorResult as err:
             raise err.with_lf(e.op)
@@ -176,7 +184,7 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
     def block_expr(self, e: BlockExpr):
         return self.eval_block(e.stmts)
 
-    def logical(self, e: Logical):
+    def logical(self, e: Logical) -> Type:
         lval = self.eval_expr(e.left)
 
         if e.op.ttype == TType.Or:
@@ -186,7 +194,7 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
             if not self.is_truthy(lval):
                 return lval
 
-        self.eval_expr(e.right)
+        return self.eval_expr(e.right)
 
     def call(self, e: Call) -> Type:
         callee = self.eval_expr(e.func)
@@ -229,6 +237,7 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
             out: Type = Nil()
             for stmt in stmts:
                 if isinstance(stmt, ExprStmt):
+                    # TODO: optimization, last expr is the value, once everything is an "expression"
                     out = self.eval_expr(stmt.expr)
                 else:
                     self.eval_stmt(stmt)
