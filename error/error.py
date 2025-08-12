@@ -58,7 +58,10 @@ class EoTypeErrorResult(BaseException):
 
 
 class LoopBreak(BaseException):
-    pass
+    """Make sure to catch this in ALL loops"""
+
+    def __init__(self, val: "Type") -> None:
+        self.val = val
 
 
 class LoopContinue(BaseException):

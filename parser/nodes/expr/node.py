@@ -40,19 +40,39 @@ class WhileExpr(Expr):
 
 
 class ForExpr(Expr):
-    def __init__(self, name: str, iterator: Expr, block: list[Stmt]) -> None:
+    """
+    The for loop can 'desugar' like this:
+    ```
+    var <expr>
+
+    while <expr>.hasNext() {
+        var i = <expr>.next();
+        // code
+    }
+    ```
+    The iterator is defined within the execution code block.
+    And expr is in the same 'scope depth' as the for loop's surrounding scope (i.e. 0)
+    """
+
+    def __init__(
+        self, name: Token, iterator: Expr, block: list[Stmt], els: list[Stmt] | None
+    ) -> None:
         self.name = name
         self.iter = iterator
         self.block = block
+        self.els = els
 
     def visit(self, v: ExprVisitor):
         return v.for_expr(self)
 
 
 class LoopFlow(Expr):
-    def __init__(self, token: Token, type: Literal["break", "continue"]):
+    def __init__(
+        self, token: Token, type: Literal["break", "continue"], val: Expr | None = None
+    ):
         self.token = token
         self.type = type
+        self.val = val
 
     def visit(self, v: ExprVisitor):
         return v.loop_flow(self)

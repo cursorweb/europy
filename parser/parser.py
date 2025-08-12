@@ -199,9 +199,16 @@ class Parser:
         ident = self.consume(TType.Identifier, "Expected variable after 'for'.")
         self.consume(TType.In, "Expected 'in' after variable name")
         iterator = self.expr()
+        self.consume(TType.LeftBrace, "Expected '{' after for loop")
         block = self.block()
 
-        return Expr.ForExpr(ident.data, iterator, block)
+        els = None
+        if self.match(TType.Else):
+            # TODO: add else for while (also just make this desugar)
+            self.consume(TType.LeftBrace, "Expected '{' after 'else'")
+            els = self.block()
+
+        return Expr.ForExpr(ident, iterator, block, els)
 
     def block(self) -> list[StmtT]:
         """Make sure to consume '{'"""
@@ -219,7 +226,10 @@ class Parser:
         expr: ExprT
 
         if tok.ttype == TType.Break:
-            expr = Expr.LoopFlow(tok, "break")
+            val = None
+            if not self.check(TType.Semi):
+                val = self.expr()
+            expr = Expr.LoopFlow(tok, "break", val)
         elif tok.ttype == TType.Continue:
             expr = Expr.LoopFlow(tok, "continue")
         elif tok.ttype == TType.Return:
@@ -421,7 +431,7 @@ class Parser:
             expr = self.expr()
             self.consume(TType.RightParen, "Expected ')' after grouping")
             return Expr.Grouping(expr)
-        
+
         if self.match(TType.LeftBrack):
             exprs = self.array()
             return Expr.ArrayExpr(exprs)
@@ -439,7 +449,7 @@ class Parser:
             out.append(self.expr())
             if not self.match(TType.Comma):
                 break
-        
+
         self.consume(TType.RightBrack, "Expected ']' after array.")
         return out
 

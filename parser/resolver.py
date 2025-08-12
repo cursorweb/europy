@@ -109,17 +109,28 @@ class Resolver(ExprVisitor, StmtVisitor):
 
     def for_expr(self, e: ForExpr):
         self.rexpr(e.iter)
+
+        self.loop_depth += 1
         self.begin_scope()
-        self.declare(e.name)
-        self.define(e.name)
+        name = e.name.data
+        self.declare(name)
+        self.define(name)
         self.rblock(e.block, False)
         self.end_scope()
+        self.loop_depth -= 1
+
+        if e.els != None:
+            self.rblock(e.els)
 
     def loop_flow(self, e: LoopFlow):
         if self.loop_depth == 0:
             raise EoSyntaxError(
                 e.token.lf, f"{e.type} statements can only be used inside loops"
             )
+
+        if e.val != None:
+            assert e.type == "break"
+            self.rexpr(e.val)
 
     def return_expr(self, e: ReturnExpr):
         if self.fn_depth == 0:

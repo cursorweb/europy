@@ -76,20 +76,48 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
         while self.is_truthy(self.eval_expr(e.cond)):
             try:
                 out = self.eval_block(e.block)
-            except LoopBreak:
-                break
+            except LoopBreak as v:
+                return v.val
             except LoopContinue:
                 pass
 
         return out
 
     def for_expr(self, e: ForExpr) -> Type:
-        raise Exception()
+        # TODO: what are iterators?
+        name = e.name.data
+
+        iter = self.eval_expr(e.iter)
+        if not isinstance(iter, Array):
+            raise EoTypeError(e.name.lf, "Only arrays can be iterated on")
+
+        out = Nil()
+
+        for itm in iter.val:
+            try:
+                env = Environment(self.env)
+                env.define(name, itm)
+                out = self.eval_block(e.block, env)
+            except LoopBreak as v:
+                return v.val
+            except LoopContinue:
+                pass
+
+        if e.els:
+            # this code would only run if the above block
+            # didn't throw a "control flow"
+            out = self.eval_block(e.els)
+
+        return out
 
     def loop_flow(self, e: LoopFlow) -> Type:
         match e.type:
             case "break":
-                raise LoopBreak()
+                if e.val:
+                    val = self.eval_expr(e.val)
+                else:
+                    val = Nil()
+                raise LoopBreak(val)
             case "continue":
                 raise LoopContinue()
             case _:

@@ -27,7 +27,7 @@ ifExpr => "if" expr block ( "elif" expr block )* ( "else" block )?
 
 whileExpr => "while" expr? block
 dowhileExpr => "do" block "while" expr ";"
-forExpr => "for" "(" IDENTIFIER "in" expr ")" block
+forExpr => "for" "(" IDENTIFIER "in" expr ")" block ( "else" block )?
 
 breakExpr => "break" ";"        # todo: "break" expr ";"
 continueExpr => "continue" ";"

@@ -1,8 +1,17 @@
-{
-    var num = 5;
-    fn call(b = call) {
-        print(b);
-    }
+fn idxof(arr, num) {
+    var i = 0;
 
-    call();
+    for itm in arr {
+        if itm == num {
+            break i;
+        }
+
+        i += 1;
+    } else {
+        -1
+    }
 }
+
+var arr = [1, 2, 3, 4];
+println(idxof(arr, 3));
+println(idxof(arr, 7));

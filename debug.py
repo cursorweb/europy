@@ -53,10 +53,13 @@ class Printer(ExprVisitor[str], StmtVisitor[str]):
         return f"while {self.eval_expr(e.cond)} {self.print_block(e.block)}"
 
     def for_expr(self, e):
-        raise Exception()
+        name = e.name.data
+        els = f" else {self.print_block(e.els)}" if e.els != None else ""
+        return f"for {name} in {e.iter.visit(self)} {self.print_block(e.block)}{els}"
 
     def loop_flow(self, e):
-        return f"{e.type}"
+        val = f" {self.eval_expr(e.val)}" if e.val != None else ""
+        return f"{e.type}{val}"
 
     def return_expr(self, e):
         out = f" {self.eval_expr(e.val)}" if e.val else ""
@@ -77,7 +80,7 @@ class Printer(ExprVisitor[str], StmtVisitor[str]):
         return f"{repr(e.val)}"
 
     def unary(self, e: "Unary"):
-        return f"{e.op}{self.eval_expr(e.expr)}"
+        return f"{e.op.ttype.value}{self.eval_expr(e.expr)}"
 
     def variable(self, e: "Variable"):
         return f"{e.name.data}#{e.scope if e.scope != None else 'g'}"

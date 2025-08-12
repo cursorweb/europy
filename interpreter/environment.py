@@ -27,7 +27,23 @@ class Environment:
             1. Add a stack that stores `count` and `inc`.
             2. Pop the stack (remove both vars)
 
-        The resolver doesn't see that, so it will still try to access inc, which no longer exists.
+        The resolver builds this code:
+        ```
+        fn make_counter() {
+            var count = 0;
+            fn inc() {
+                count#1 += 1;
+            }
+            return inc#0;
+        }
+
+        var c = make_counter#g();
+        ```
+        When it calls `make_counter`,
+        it's going to pass in a new reference to `inc` that lives in the stack we just popped out (it's deleted).
+        So, we need that stack to remain alive for as long as *every scope that uses it remains alive*.
+        **Not how long the scope itself lives!** For this reason, we use the parent pointer tree structure.
+        Functionally, it acts like a stack, **but** the difference is it doesn't free up stacks until *no one needs it anymore*
         """
         self.parent = parent
         self.values: dict[str, Type] = {}
@@ -44,9 +60,8 @@ class Environment:
         if name in self.values:
             return self.values[name]
 
+        # should be global
         assert not self.parent
-        # if self.parent:
-        #     return self.parent.get(token)
 
         raise EoRuntimeError(token.lf, f"Undefined variable '{name}'.")
 
@@ -60,9 +75,8 @@ class Environment:
             self.values[name] = value
             return
 
+        # should be global
         assert not self.parent
-        # if self.parent:
-        #     return self.parent.assign(token, value)
 
         raise EoRuntimeError(token.lf, f"Undefined variable '{name}'.")
 
