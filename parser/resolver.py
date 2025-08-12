@@ -108,7 +108,12 @@ class Resolver(ExprVisitor, StmtVisitor):
         self.loop_depth -= 1
 
     def for_expr(self, e: ForExpr):
-        raise Exception()
+        self.rexpr(e.iter)
+        self.begin_scope()
+        self.declare(e.name)
+        self.define(e.name)
+        self.rblock(e.block, False)
+        self.end_scope()
 
     def loop_flow(self, e: LoopFlow):
         if self.loop_depth == 0:
@@ -127,9 +132,13 @@ class Resolver(ExprVisitor, StmtVisitor):
 
     def fn_decl(self, e: FunctionDecl):
         self.declare(e.name.data)
-        self.define(e.name.data)
 
         seen_names = set()
+
+        for _, expr in e.opt_params:
+            self.rexpr(expr)
+
+        self.define(e.name.data)
 
         self.begin_scope()
         for token in e.params:
@@ -142,7 +151,7 @@ class Resolver(ExprVisitor, StmtVisitor):
             self.declare(name)
             self.define(name)
 
-        for token, expr in e.opt_params:
+        for token, _ in e.opt_params:
             name = token.data
 
             if name in seen_names:
@@ -150,7 +159,6 @@ class Resolver(ExprVisitor, StmtVisitor):
             seen_names.add(name)
 
             self.declare(name)
-            self.rexpr(expr)
             self.define(name)
 
         self.fn_depth += 1

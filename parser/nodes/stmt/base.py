@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Generic, TypeVar
 if TYPE_CHECKING:
     from .node import *
 
-T = TypeVar("T", default=None)
+T = TypeVar("T")
 
 
 # interpreter will extend both
