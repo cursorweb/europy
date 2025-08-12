@@ -1,17 +1,25 @@
-fn idxof(arr, num) {
-    var i = 0;
+fn while_loop(n) {
+    var start = clock();
 
-    for itm in arr {
-        if itm == num {
-            break i;
-        }
-
+    var i = 0, s = 0;
+    while i < n {
+        s += i;
         i += 1;
-    } else {
-        -1
     }
+
+    return clock() - start;
 }
 
-var arr = [1, 2, 3, 4];
-println(idxof(arr, 3));
-println(idxof(arr, 7));
+/* fn for_loop(n) {
+    var start = clock();
+
+    var s = 0;
+    for i in 0..n {
+        s += i;
+    }
+
+    return clock() - start;
+} */
+
+println("while " + while_loop(1000));
+// println("for " + while_loop(2));

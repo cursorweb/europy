@@ -11,6 +11,8 @@ from eotypes import *
 from parser.nodes.expr.node import *
 from parser.nodes.stmt.node import *
 
+import time
+
 
 class Interpreter(ExprVisitor[Type], StmtVisitor):
     env: Environment
@@ -27,12 +29,17 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
         That'll still get you the same error or something else entirely.
         """
 
-        def fn(dict: dict[str, Type]):
+        def print_fn(dict: dict[str, Type]):
             print(dict["name"].to_string())
             return Nil()
 
-        self.globals.define("print", make_fn(["name"], [], fn))
-        self.globals.define("println", make_fn(["name"], [], fn))
+        def clock_fn(dict: dict[str, Type]):
+            # measure time in milliseconds
+            return Num(time.perf_counter_ns() / 1_000_000)
+
+        self.globals.define("print", make_fn(["name"], [], print_fn))
+        self.globals.define("println", make_fn(["name"], [], print_fn))
+        self.globals.define("clock", make_fn([], [], clock_fn))
 
     def run(self):
         for tree in self.trees:

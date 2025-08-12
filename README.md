@@ -58,6 +58,7 @@ This is **NOT** a replacement for Europa, nor is it a rewrite. This is just for 
 
     *of course not everything, like variable declarations still need a semicolon, and return statements as well.
 * Module strategy: imported modules need to have a `mod` statement (or something similar) as the first statement, and they may not run code. Then, whenever a file is referenced, load it in. And then execute the main file.
+* For loops are back! There is an added `else` branch which runs if the for loop doesn't pass `break` (like python).
 
 ## Motivation
 i have new ideas for europa, after being on hiatus, and i feel like to iterate faster, i should use python.
