@@ -174,7 +174,7 @@ class Resolver(ExprVisitor, StmtVisitor):
     def grouping(self, e: Grouping):
         self.rexpr(e.expr)
 
-    def literal(self, _: LiteralVal):
+    def literal(self, e: LiteralVal):
         return
 
     def unary(self, e: Unary):
@@ -212,8 +212,9 @@ class Resolver(ExprVisitor, StmtVisitor):
     def prop(self, e: Prop):
         raise Exception()
 
-    def array(self, e: Array):
-        raise Exception()
+    def array(self, e: ArrayExpr):
+        for itm in e.itms:
+            self.rexpr(itm)
 
     def map(self, e: Map):
         raise Exception()

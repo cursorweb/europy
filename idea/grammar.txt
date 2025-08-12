@@ -11,7 +11,7 @@ varDecl => "var" IDENTIFIER ("=" expr )? ( "," IDENTIFIER ("=" expr )? )* ";"
 fnDecl => "fn" IDENTIFIER function
 useStmt => "use" IDENTIFIER ( "." ( ( "{" ( IDENTIFIER "," )* IDENTIFIER "}" ) | IDENTIFIER | "*" ) ) ";"
 
-exprStmt => expr ";" | exprLike
+exprStmt => exprNoOp ";" | exprLike
 exprLike => block
           | ifExpr
           | whileExpr
@@ -21,6 +21,7 @@ exprLike => block
           | continueExpr
           | returnExpr
 
+expr => exprLike | exprNoOp
 
 ifExpr => "if" expr block ( "elif" expr block )* ( "else" block )?
 
@@ -34,7 +35,7 @@ returnExpr => "return" expr? ";"
 
 
 # expressions
-expr => range
+exprNoOp => range
 range => ternary ( ( ".." | ".=" ) ternary )?
 
 ternary => assignment ( "?" expr ":" ternary )?

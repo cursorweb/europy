@@ -56,7 +56,7 @@ This is **NOT** a replacement for Europa, nor is it a rewrite. This is just for 
     ```
     The rules are simple: you can omit a semicolon if it is there is a right brace or it is the end of file.
 
-    ##### *of course not everything, like variable declarations still need a semicolon, and return statements as well.
+    *of course not everything, like variable declarations still need a semicolon, and return statements as well.
 * Module strategy: imported modules need to have a `mod` statement (or something similar) as the first statement, and they may not run code. Then, whenever a file is referenced, load it in. And then execute the main file.
 
 ## Motivation

@@ -105,8 +105,9 @@ class Printer(ExprVisitor[str], StmtVisitor[str]):
     def prop(self, e: "Prop"):
         raise Exception()
 
-    def array(self, e: "Array"):
-        raise Exception()
+    def array(self, e: "ArrayExpr"):
+        items = [self.eval_expr(itm) for itm in e.itms]
+        return f"[{', '.join(items)}]"
 
     def map(self, e: "Map"):
         raise Exception()

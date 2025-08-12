@@ -218,8 +218,12 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
     def prop(self, e: Prop):
         raise Exception()
 
-    def array(self, e: Array):
-        raise Exception()
+    def array(self, e: ArrayExpr):
+        items = []
+        for itm in e.itms:
+            # we have an AMAZING opportunity to be lazy here
+            items.append(itm.visit(self))
+        return Array(items)
 
     def map(self, e: Map):
         raise Exception()

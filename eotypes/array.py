@@ -5,7 +5,7 @@ from .type import Bool, Type
 class Array(Type):
     val: list[Type]
 
-    def __init__(self, val: str):
+    def __init__(self, val: list[Type]):
         super().__init__(val, "array")
 
     def less(self, right: "Type"):

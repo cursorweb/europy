@@ -1,11 +1,11 @@
 fn isEven(n) {
-  if (n == 0) { return true; }
-  isOdd(n - 1)
+    if (n == 0) { return true; }
+    isOdd(n - 1)
 }
 
 fn isOdd(n) {
-  if (n == 0) { return false; }
-  isEven(n - 1)
+    if (n == 0) { return false; }
+    isEven(n - 1)
 }
 
 println(isOdd(3)); // true

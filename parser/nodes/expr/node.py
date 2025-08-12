@@ -188,7 +188,7 @@ class Prop(Expr):
         return v.prop(self)
 
 
-class Array(Expr):
+class ArrayExpr(Expr):
     def __init__(self, itms: list[Expr]):
         self.itms = itms
 

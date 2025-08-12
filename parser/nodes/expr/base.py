@@ -80,7 +80,7 @@ class ExprVisitor(ABC, Generic[T]):
         raise Exception()
 
     @abstractmethod
-    def array(self, e: "Array") -> T:
+    def array(self, e: "ArrayExpr") -> T:
         raise Exception()
 
     @abstractmethod

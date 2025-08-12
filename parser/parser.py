@@ -108,12 +108,14 @@ class Parser:
         return Stmt.FunctionDecl(name, params, opt_params, stmts)
 
     def expr_stmt(self) -> StmtT:
-        expr = self.expr()
-        self.consume_semi("Expected ';' after expression.")
+        expr = self.expr_like()
+        if expr == None:
+            expr = self.expr_noop()
+            self.consume_semi("Expected ';' after expression.")
 
         return Stmt.ExprStmt(expr)
 
-    def expr(self) -> ExprT:
+    def expr_like(self) -> ExprT | None:
         if self.match(TType.If):
             return Expr.IfExpr(*self.if_stmt())
 
@@ -132,7 +134,13 @@ class Parser:
         if self.match(TType.Break, TType.Continue, TType.Return):
             return self.controlflow_expr()
 
-        return self.expr_noop()
+        return None
+
+    def expr(self) -> ExprT:
+        expr = self.expr_like()
+        if expr == None:
+            expr = self.expr_noop()
+        return expr
 
     """ Expr Like """
 
@@ -413,6 +421,10 @@ class Parser:
             expr = self.expr()
             self.consume(TType.RightParen, "Expected ')' after grouping")
             return Expr.Grouping(expr)
+        
+        if self.match(TType.LeftBrack):
+            exprs = self.array()
+            return Expr.ArrayExpr(exprs)
 
         if self.match(TType.LeftBrace):
             stmts = self.block()
@@ -420,6 +432,16 @@ class Parser:
 
         tok = self.peek()
         self.report_err(tok, f"Unexpected token '{tok.ttype}'")
+
+    def array(self) -> list[ExprT]:
+        out = []
+        while not self.check(TType.RightBrack):
+            out.append(self.expr())
+            if not self.match(TType.Comma):
+                break
+        
+        self.consume(TType.RightBrack, "Expected ']' after array.")
+        return out
 
     """ Utils """
 
@@ -432,7 +454,7 @@ class Parser:
         if self.match(TType.Semi):
             return
 
-        if self.check(TType.RightBrace, TType.EOF):
+        if self.is_end() or self.check(TType.RightBrace):
             return
 
         self.report_err(self.peek(), msg)
@@ -447,6 +469,9 @@ class Parser:
         return False
 
     def check(self, *ttypes: TType, n: int = 0):
+        if self.is_end():
+            return False
+
         """Check if the current (unconsumed) token is the ttype we want, doesn't eat it"""
         for ttype in ttypes:
             if self.peek(n).ttype == ttype:
