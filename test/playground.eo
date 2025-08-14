@@ -10,16 +10,17 @@ fn while_loop(n) {
     return clock() - start;
 }
 
-/* fn for_loop(n) {
+fn for_loop(n) {
     var start = clock();
 
-    var s = 0;
+    var i = 0, s = 0;
     for i in 0..n {
         s += i;
+        i += 1;
     }
 
     return clock() - start;
-} */
+}
 
-println("while " + while_loop(1000));
-// println("for " + while_loop(2));
+println("while " + while_loop(10000) + "ms");
+println("for " + while_loop(10000) + "ms");

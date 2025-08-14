@@ -115,8 +115,9 @@ class Printer(ExprVisitor[str], StmtVisitor[str]):
     def map(self, e: "Map"):
         raise Exception()
 
-    def range(self, e: "Range"):
-        raise Exception()
+    def range(self, e: "RangeExpr"):
+        eq = "=" if e.inclusive else ""
+        return f"{self.eval_expr(e.start)}..{eq}{self.eval_expr(e.end)}"
 
     def print_block(self, stmts: list[Stmt]):
         self.indent += 1

@@ -238,5 +238,6 @@ class Resolver(ExprVisitor, StmtVisitor):
     def map(self, e: Map):
         raise Exception()
 
-    def range(self, e: Range):
-        raise Exception()
+    def range(self, e: RangeExpr):
+        self.rexpr(e.start)
+        self.rexpr(e.end)

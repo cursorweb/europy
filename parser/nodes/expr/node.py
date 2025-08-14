@@ -224,13 +224,13 @@ class Map(Expr):
         return v.map(self)
 
 
-class Range(Expr):
-    # 1..3 | 1.=4
-    def __init__(self, s: Expr, dot: Token, e: Expr, inc: bool):
-        self.start = s
+class RangeExpr(Expr):
+    # 1..3 | 1.=4 | 1..:2
+    def __init__(self, start: Expr, dot: Token, end: Expr, inclusive: bool):
+        self.start = start
         self.dot = dot
-        self.end = e
-        self.inc = inc
+        self.end = end
+        self.inclusive = inclusive
 
     def visit(self, v: "ExprVisitor"):
         return v.range(self)

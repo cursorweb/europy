@@ -88,7 +88,7 @@ class ExprVisitor(ABC, Generic[T]):
         raise Exception()
 
     @abstractmethod
-    def range(self, e: "Range") -> T:
+    def range(self, e: "RangeExpr") -> T:
         raise Exception()
 
 

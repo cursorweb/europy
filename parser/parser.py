@@ -246,7 +246,21 @@ class Parser:
     """ Expr """
 
     def expr_noop(self) -> ExprT:
-        return self.ternary()
+        return self.range()
+
+    def range(self) -> ExprT:
+        expr = self.ternary()
+        # todo: add infinite ranges
+        if self.match(TType.DotDot):
+            dot = self.prev()
+            right = self.expr()
+            expr = Expr.RangeExpr(expr, dot, right, False)
+        elif self.match(TType.DotEq):
+            dot = self.prev()
+            right = self.expr()
+            expr = Expr.RangeExpr(expr, dot, right, True)
+
+        return expr
 
     def ternary(self) -> ExprT:
         expr = self.assignment()

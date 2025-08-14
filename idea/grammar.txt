@@ -29,7 +29,7 @@ whileExpr => "while" expr? block
 dowhileExpr => "do" block "while" expr ";"
 forExpr => "for" "(" IDENTIFIER "in" expr ")" block ( "else" block )?
 
-breakExpr => "break" ";"        # todo: "break" expr ";"
+breakExpr => "break" expr? ";"
 continueExpr => "continue" ";"
 returnExpr => "return" expr? ";"
 

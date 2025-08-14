@@ -94,15 +94,26 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
         # TODO: what are iterators?
         name = e.name.data
 
-        iter = self.eval_expr(e.iter)
-        if not isinstance(iter, Array):
+        iter_type = self.eval_expr(e.iter)
+        if not isinstance(iter_type, (Array, Range)):
             raise EoTypeError(e.name.lf, "Only arrays can be iterated on")
+
+        if isinstance(iter_type, Range):
+            end = iter_type.end
+            if iter_type.inclusive:
+                end += 1
+
+            iter = range(int(iter_type.start), int(end))
+        else:
+            iter = iter_type.val
 
         out = Nil()
 
-        for itm in iter.val:
+        for itm in iter:
             try:
                 env = Environment(self.env)
+                if isinstance(itm, int):
+                    itm = Num(itm)
                 env.define(name, itm)
                 out = self.eval_block(e.block, env)
             except LoopBreak as v:
@@ -263,8 +274,15 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
     def map(self, e: Map):
         raise Exception()
 
-    def range(self, e: Range):
-        raise Exception()
+    def range(self, e: RangeExpr):
+        inclusive = e.dot.ttype == TType.DotEq
+        start = self.eval_expr(e.start)
+        end = self.eval_expr(e.end)
+
+        if start.tname != "num" or end.tname != "num":
+            raise EoTypeError(e.dot.lf, "Ranges can only have numbers")
+
+        return Range(start.val, end.val, inclusive)
 
     """ Util """
 
