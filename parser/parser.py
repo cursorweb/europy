@@ -234,7 +234,7 @@ class Parser:
             expr = Expr.LoopFlow(tok, "continue")
         elif tok.ttype == TType.Return:
             val = None
-            if not self.match(TType.Semi):
+            if not self.check(TType.Semi):
                 val = self.expr()
             expr = Expr.ReturnExpr(tok, val)
         else:
@@ -455,7 +455,7 @@ class Parser:
             return Expr.BlockExpr(stmts)
 
         tok = self.peek()
-        self.report_err(tok, f"Unexpected token '{tok.ttype}'")
+        self.report_err(tok, f"Unexpected token '{tok.ttype.value}'")
 
     def array(self) -> list[ExprT]:
         out = []
