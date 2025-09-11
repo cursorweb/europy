@@ -4,6 +4,7 @@ from tokens import Token, TType
 
 
 # todos: those cool errors (tm)
+# todo: fix self.peek() so that i = 0 isn't read initially
 class Lexer:
     i = 0
     tokens: list[Token] = []
@@ -66,7 +67,7 @@ class Lexer:
 
     def run(self):
         while self.is_valid():
-            char = self.code[self.i]
+            char = self.next()
 
             # todo: use match
             if char == "{":
@@ -117,9 +118,8 @@ class Lexer:
                         self.newline()
 
                     if self.peek() == "\\":
-                        self.next()
-                        c = self.peek()
-                        self.next()
+                        self.next()  # \
+                        c = self.next()  # n
 
                         if c == "n":
                             string += "\n"
@@ -233,7 +233,7 @@ class Lexer:
                         self.next()
                 elif self.match("*"):
                     while self.is_valid() and not (
-                        self.peek() == "*" and self.peek(2) == "/"
+                        self.peek() == "*" and self.peek(1) == "/"
                     ):
                         if self.peek() == "\n":
                             self.newline()
@@ -289,8 +289,6 @@ class Lexer:
                 else:
                     raise EoSyntaxError(self.lf, f"Unexpected token '{char}'")
 
-            self.next()
-
         self.append_token(TType.EOF)
         return self.tokens
 
@@ -313,6 +311,7 @@ class Lexer:
     def next(self):
         self.i += 1
         self.lf.col += 1
+        return self.prev()
 
     def newline(self):
         """newline resets the col, but self.next() will still be called"""
@@ -321,7 +320,10 @@ class Lexer:
 
     """ Peeking """
 
-    def peek(self, n=1):
+    def prev(self):
+        return self.code[self.i - 1]
+
+    def peek(self, n=0):
         if not self.is_valid() or self.i + n >= self.lenc:
             return "\0"
         return self.code[self.i + n]

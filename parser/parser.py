@@ -111,7 +111,9 @@ class Parser:
         expr = self.expr_like()
         if expr == None:
             expr = self.expr_noop()
-            self.consume_semi("Expected ';' after expression.")
+            self.consume_semi(
+                f"Expected ';' after expression (got '{self.peek().ttype.value}')."
+            )
 
         return Stmt.ExprStmt(expr)
 

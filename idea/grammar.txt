@@ -38,7 +38,7 @@ returnExpr => "return" expr? ";"
 exprNoOp => range
 range => ternary ( ( ".." | ".=" ) ternary )?
 
-ternary => assignment ( "?" expr ":" ternary )?
+ternary => assignment ( "?" expr ":" expr )?
 assignment => ( IDENTIFIER ( "=" | "+=" | "-=" | "*=" | "/=" | "**=" | "%=" ) assignment ) | or
 
 or => and ( "or" and )*
