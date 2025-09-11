@@ -25,18 +25,6 @@ class String(Type):
 
         raise EoTypeErrorResult(self, right)
 
-    def grtre(self, right: "Type"):
-        if right.tname == "string":
-            return Bool(len(self.val) >= len(right.val))
-
-        raise EoTypeErrorResult(self, right)
-
-    def lesse(self, right: "Type"):
-        if right.tname == "string":
-            return Bool(len(self.val) <= len(right.val))
-
-        raise EoTypeErrorResult(self, right)
-
     def to_string(self):
         v = self.val.replace('"', '\\"')
         return v

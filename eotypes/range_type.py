@@ -26,19 +26,7 @@ class Range(Type):
 
         raise EoTypeErrorResult(self, right)
 
-    def lesse(self, right: "Type"):
-        if isinstance(right, Range):
-            return Bool(self.len < right.len)
-
-        raise EoTypeErrorResult(self, right)
-
     def grtr(self, right: "Type"):
-        if isinstance(right, Range):
-            return Bool(self.len < right.len)
-
-        raise EoTypeErrorResult(self, right)
-
-    def grtre(self, right: "Type"):
         if isinstance(right, Range):
             return Bool(self.len < right.len)
 

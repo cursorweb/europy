@@ -45,10 +45,10 @@ class Type(ABC):
         raise EoTypeErrorResult(self, right)
 
     def grtre(self, right: "Type") -> "Type":
-        raise EoTypeErrorResult(self, right)
+        return Bool(not self.less(right).val)
 
     def lesse(self, right: "Type") -> "Type":
-        raise EoTypeErrorResult(self, right)
+        return Bool(not self.grtr(right).val)
 
     def negate(self) -> "Type":
         raise EoTypeErrorResult(self)
