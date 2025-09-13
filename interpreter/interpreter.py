@@ -1,3 +1,5 @@
+from typing import Iterable
+
 from eotypes.callable import Callable, EoFunction, make_fn
 from error.error import EoTypeError, FnReturn, LoopBreak, LoopContinue
 from interpreter.environment import Environment
@@ -53,6 +55,10 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
     def eval_expr(self, e: Expr) -> Type:
         return e.visit(self)
 
+    def eval_get(self, e: Get) -> tuple[Type, Type]:
+        """returns a tuple of (target, idx)"""
+        return self.eval_expr(e.name), self.eval_expr(e.idx)
+
     """ Stmt """
 
     def expr_stmt(self, e: ExprStmt):
@@ -78,7 +84,7 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
         return Nil()
 
     def while_expr(self, e: WhileExpr) -> Type:
-        out = Nil()
+        out: Type = Nil()
 
         while self.is_truthy(self.eval_expr(e.cond)):
             try:
@@ -98,6 +104,8 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
         if not isinstance(iter_type, (Array, Range)):
             raise EoTypeError(e.name.lf, "Only arrays can be iterated on")
 
+        iter: Iterable[int | Type]
+
         if isinstance(iter_type, Range):
             end = iter_type.end
             if iter_type.inclusive:
@@ -107,7 +115,7 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
         else:
             iter = iter_type.val
 
-        out = Nil()
+        out: Type = Nil()
 
         for itm in iter:
             try:
@@ -163,10 +171,24 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
     def assign(self, e: Assign) -> Type:
         value = self.eval_expr(e.value)
 
-        if e.scope != None:
-            self.env.assign_at(e.name, value, e.scope)
-        else:
-            self.globals.assign(e.name, value)
+        if isinstance(e.lval, Variable):
+            var = e.lval
+            if var.scope != None:
+                self.env.assign_at(var.name, value, var.scope)
+            else:
+                self.globals.assign(var.name, value)
+        elif isinstance(e.target, Get):
+            target, idx = self.eval_get(e.target)
+            if isinstance(target, Array) and isinstance(idx, Num):
+                if idx.val < 0 or idx.val >= len(target.val) or int(idx.val) != idx.val:
+                    raise EoTypeError(
+                        e.target.brack.lf,
+                        f"Invalid index: {idx.val} (Max length is {len(target.val)})",
+                    )
+                int_idx = int(idx.val)
+                target.val[int_idx] = value
+            else:
+                raise EoTypeError(e.target.brack.lf, "Invalid assignment target")
 
         return Nil()
 
@@ -256,9 +278,6 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
         return callee.call(e.paren, args, named_args)
 
     def get(self, e: Get):
-        raise Exception()
-
-    def set(self, e: Set):
         raise Exception()
 
     def prop(self, e: Prop):

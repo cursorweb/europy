@@ -287,13 +287,10 @@ class Parser:
             TType.PowEq,
             TType.ModEq,
         ):
-            if not isinstance(expr, Expr.Variable):
-                self.report_err(self.prev(), "Invalid assignment target")
-            name = expr.name
             assign_op = self.prev()
             val = self.expr()
             if assign_op.ttype == TType.Eq:
-                expr = Expr.Assign(name, val)
+                expr = Expr.Assign(expr, assign_op, val)
             else:
                 match assign_op.ttype:
                     case TType.PlusEq:
@@ -312,8 +309,9 @@ class Parser:
                         raise Exception("Unreachable")
 
                 expr = Expr.Assign(
-                    name,
-                    Expr.Binary(Expr.Variable(name), Token(op, assign_op.lf), val),
+                    expr,
+                    assign_op,
+                    Expr.Binary(expr, Token(op, assign_op.lf), val),
                 )
         return expr
 
@@ -386,39 +384,47 @@ class Parser:
     def call(self) -> ExprT:
         expr = self.primary()
 
-        if self.match(TType.LeftParen):
-            paren = self.prev()
-            args: list[ExprT] = []
-            named_args: list[tuple[Token, ExprT]] = []
-            seen_named_args = False
+        while True:
+            if self.match(TType.LeftParen):
+                paren = self.prev()
+                args: list[ExprT] = []
+                named_args: list[tuple[Token, ExprT]] = []
+                seen_named_args = False
 
-            while not self.check(TType.RightParen):
-                if (
-                    not seen_named_args
-                    and self.check(TType.Identifier)
-                    and self.check(TType.Eq, n=1)
-                ):
-                    seen_named_args = True
+                while not self.check(TType.RightParen):
+                    if (
+                        not seen_named_args
+                        and self.check(TType.Identifier)
+                        and self.check(TType.Eq, n=1)
+                    ):
+                        seen_named_args = True
 
-                if seen_named_args:
-                    name = self.consume(
-                        TType.Identifier,
-                        "Named arguments may only come after positional arguments",
-                    )
-                    self.consume(
-                        TType.Eq,
-                        "Expected '=' after argument name",
-                    )
-                    val = self.expr()
-                    named_args.append((name, val))
-                else:
-                    args.append(self.expr())
+                    if seen_named_args:
+                        name = self.consume(
+                            TType.Identifier,
+                            "Named arguments may only come after positional arguments",
+                        )
+                        self.consume(
+                            TType.Eq,
+                            "Expected '=' after argument name",
+                        )
+                        val = self.expr()
+                        named_args.append((name, val))
+                    else:
+                        args.append(self.expr())
 
-                if not self.match(TType.Comma):
-                    break
+                    if not self.match(TType.Comma):
+                        break
 
-            self.consume(TType.RightParen, "Expected ')' after arguments.")
-            expr = Expr.Call(expr, paren, args, named_args)
+                self.consume(TType.RightParen, "Expected ')' after arguments.")
+                expr = Expr.Call(expr, paren, args, named_args)
+            elif self.match(TType.LeftBrack):
+                brack = self.prev()
+                idx = self.expr()
+                self.consume(TType.RightBrack, "Expected ']' after indexing.")
+                expr = Expr.Get(expr, brack, idx)
+            else:
+                break
         return expr
 
     def primary(self) -> ExprT:

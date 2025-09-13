@@ -56,12 +56,24 @@ class Resolver(ExprVisitor, StmtVisitor):
         if start_scope:
             self.end_scope()
 
-    def resolve_var(self, tok: Token, expr: Variable | Assign):
+    def resolve_var(self, tok: Token, expr: Variable):
         name = tok.data
         for i, scope in enumerate(reversed(self.scopes)):
             if name in scope and scope[name]:
                 expr.scope = i
                 return
+
+    def rcheck_assign(self, target: Expr, token: Token) -> Variable | Get:
+        """Also resolves target"""
+        self.rexpr(target)
+        if isinstance(target, Grouping):
+            return self.rcheck_assign(target.expr, token)
+        elif isinstance(target, Variable):
+            return target
+        elif isinstance(target, Get):
+            return target
+        else:
+            raise EoSyntaxError(token.lf, "Invalid assignment target")
 
     def begin_scope(self):
         self.scopes.append({})
@@ -183,8 +195,9 @@ class Resolver(ExprVisitor, StmtVisitor):
     """ Expr """
 
     def assign(self, e: Assign):
-        self.resolve_var(e.name, e)
+        lval = self.rcheck_assign(e.target, e.equals)
         self.rexpr(e.value)
+        e.lval = lval
 
     def binary(self, e: Binary):
         self.rexpr(e.left)
@@ -223,10 +236,8 @@ class Resolver(ExprVisitor, StmtVisitor):
             self.rexpr(arg)
 
     def get(self, e: Get):
-        raise Exception()
-
-    def set(self, e: Set):
-        raise Exception()
+        self.rexpr(e.name)
+        self.rexpr(e.idx)
 
     def prop(self, e: Prop):
         raise Exception()

@@ -72,10 +72,6 @@ class ExprVisitor(ABC, Generic[T]):
         raise Exception()
 
     @abstractmethod
-    def set(self, e: "Set") -> T:
-        raise Exception()
-
-    @abstractmethod
     def prop(self, e: "Prop") -> T:
         raise Exception()
 

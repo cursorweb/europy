@@ -68,7 +68,7 @@ class Printer(ExprVisitor[str], StmtVisitor[str]):
     """ expr """
 
     def assign(self, e: "Assign"):
-        return f"{e.name.data}#{e.scope if e.scope != None else 'g'} = {self.eval_expr(e.value)}"
+        return f"{self.eval_expr(e.target)} = {self.eval_expr(e.value)}"
 
     def binary(self, e: "Binary"):
         return f"{self.eval_expr(e.left)} {e.op.ttype.value} {self.eval_expr(e.right)}"
@@ -100,10 +100,7 @@ class Printer(ExprVisitor[str], StmtVisitor[str]):
         return f"{self.eval_expr(e.func)}({args}{named_args})"
 
     def get(self, e: "Get"):
-        raise Exception()
-
-    def set(self, e: "Set"):
-        raise Exception()
+        return f"{self.eval_expr(e.name)}[{self.eval_expr(e.idx)}]"
 
     def prop(self, e: "Prop"):
         raise Exception()

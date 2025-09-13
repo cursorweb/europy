@@ -39,7 +39,8 @@ exprNoOp => range
 range => ternary ( ( ".." | ".=" ) ternary )?
 
 ternary => assignment ( "?" expr ":" expr )?
-assignment => ( IDENTIFIER ( "=" | "+=" | "-=" | "*=" | "/=" | "**=" | "%=" ) assignment ) | or
+assignment => ( ( assignment_target ) ( "=" | "+=" | "-=" | "*=" | "/=" | "**=" | "%=" ) assignment ) | or
+assignment_target = expr
 
 or => and ( "or" and )*
 and => equality ( "and" equality )*

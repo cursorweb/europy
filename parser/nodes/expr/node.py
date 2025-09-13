@@ -91,10 +91,14 @@ class ReturnExpr(Expr):
 
 
 class Assign(Expr):
-    def __init__(self, name: Token, value: Expr):
-        self.name = name
+    """Expr should either evaluate to variable or a a getter (m[i])"""
+
+    def __init__(self, target: Expr, equals: Token, value: Expr):
+        self.target = target
+        self.equals = equals
         self.value = value
-        self.scope: int | None = None
+        self.lval: Variable | Get | None = None
+        """ Check to see if it is maybe_name (from the resolver), so that you can immediately assign it """
 
     def visit(self, v: "ExprVisitor"):
         return v.assign(self)
@@ -173,28 +177,15 @@ class Call(Expr):
 
 
 class Get(Expr):
-    """expr[expr]"""
+    """name[idx]"""
 
-    def __init__(self, expr: Expr, brack: Token, name: Expr):
-        self.expr = expr
-        self.brack = brack
+    def __init__(self, name: Expr, brack: Token, idx: Expr):
         self.name = name
+        self.brack = brack
+        self.idx = idx
 
     def visit(self, v: "ExprVisitor"):
         return v.get(self)
-
-
-class Set(Expr):
-    """expr[expr] = expr"""
-
-    def __init__(self, expr: Expr, brack: Token, name: Expr, val: Expr):
-        self.expr = expr
-        self.brack = brack
-        self.name = name
-        self.val = val
-
-    def visit(self, v: "ExprVisitor"):
-        return v.set(self)
 
 
 class Prop(Expr):
