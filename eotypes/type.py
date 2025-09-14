@@ -56,6 +56,12 @@ class Type(ABC):
     def not_op(self) -> "Type":
         raise EoTypeErrorResult(self)
 
+    def get(self, index: "Type") -> "Type":
+        raise EoTypeErrorResult(self, index)
+
+    def set(self, index: "Type", val: "Type") -> None:
+        raise EoTypeErrorResult(self, index)
+
     def __repr__(self) -> str:
         return self.to_string()
 

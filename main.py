@@ -9,7 +9,7 @@ from sys import exit
 from error import EoError
 from parser.resolver import Resolver
 
-lexer = Lexer.from_file("test/playground.eo")  # playground.eo")
+lexer = Lexer.from_file("./test/playground.eo")  # playground.eo")
 try:
     tokens = lexer.run()
 except EoError as e:

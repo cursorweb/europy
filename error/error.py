@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -45,16 +46,33 @@ class EoTypeError(EoError):
         super().__init__("TypeError", lf, msg)
 
 
-class EoTypeErrorResult(BaseException):
-    """Raise a type error that gets promoted to a EoTypeError"""
+class EoErrorResult(ABC, BaseException):
+    @abstractmethod
+    def with_lf(self, op: "Token") -> EoError:
+        pass
+
+
+class EoTypeErrorResult(EoErrorResult):
+    """Raise a type error that gets promoted to a EoTypeError (EoTypeErrorResult does not have line info)"""
 
     def __init__(self, *types: "Type"):
         self.types = map(lambda t: t.tname, types)
 
     def with_lf(self, op: "Token"):
         return EoTypeError(
-            op.lf, f"Operator '{op.ttype}' can't be applied to {', '.join(self.types)}"
+            op.lf,
+            f"Operator '{op.ttype.value}' can't be applied to {', '.join(self.types)}",
         )
+
+
+class EoIndexErrorResult(EoErrorResult):
+    def __init__(self, key: "Type", message: str | None):
+        self.key = key
+        self.message = message
+
+    def with_lf(self, op: "Token"):
+        msg = f": {self.message}" if self.message != None else ""
+        return EoTypeError(op.lf, f"Invalid index '{self.key}'{msg}.")
 
 
 class LoopBreak(BaseException):

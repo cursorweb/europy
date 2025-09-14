@@ -1,7 +1,7 @@
 from typing import Iterable
 
 from eotypes.callable import Callable, EoFunction, make_fn
-from error.error import EoTypeError, FnReturn, LoopBreak, LoopContinue
+from error.error import EoTypeError, EoErrorResult, FnReturn, LoopBreak, LoopContinue
 from interpreter.environment import Environment
 from parser.nodes.expr.base import Expr, ExprVisitor
 from parser.nodes.stmt.base import Stmt, StmtVisitor
@@ -54,10 +54,6 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
 
     def eval_expr(self, e: Expr) -> Type:
         return e.visit(self)
-
-    def eval_get(self, e: Get) -> tuple[Type, Type]:
-        """returns a tuple of (target, idx)"""
-        return self.eval_expr(e.name), self.eval_expr(e.idx)
 
     """ Stmt """
 
@@ -178,17 +174,13 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
             else:
                 self.globals.assign(var.name, value)
         elif isinstance(e.target, Get):
-            target, idx = self.eval_get(e.target)
-            if isinstance(target, Array) and isinstance(idx, Num):
-                if idx.val < 0 or idx.val >= len(target.val) or int(idx.val) != idx.val:
-                    raise EoTypeError(
-                        e.target.brack.lf,
-                        f"Invalid index: {idx.val} (Max length is {len(target.val)})",
-                    )
-                int_idx = int(idx.val)
-                target.val[int_idx] = value
-            else:
-                raise EoTypeError(e.target.brack.lf, "Invalid assignment target")
+            try:
+                target = self.eval_expr(e.target.name)
+                idx = self.eval_expr(e.target.idx)
+
+                target.set(idx, value)
+            except EoErrorResult as err:
+                raise err.with_lf(e.target.brack)
 
         return Nil()
 
@@ -223,8 +215,7 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
                     return left.lesse(right)
                 case _:
                     raise Exception("Unreachable")
-
-        except EoTypeErrorResult as err:
+        except EoErrorResult as err:
             raise err.with_lf(e.op)
 
     def grouping(self, e: Grouping):
@@ -278,7 +269,10 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
         return callee.call(e.paren, args, named_args)
 
     def get(self, e: Get):
-        raise Exception()
+        name = self.eval_expr(e.name)
+        idx = self.eval_expr(e.idx)
+        # todo: checkers
+        return name.val[int(idx.val)]
 
     def prop(self, e: Prop):
         raise Exception()

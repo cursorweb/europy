@@ -1,0 +1,19 @@
+{
+    var array = [1, 2, 3];
+    fn move(a) {
+        return a;
+    }
+
+    (array)[0] = 6;
+
+    move(array)[1] = 5;
+    print(array);
+
+    var nest = [[1, 2], [3, 4]];
+    nest[0][1] = 5;
+    print(nest);
+
+    var number = 6;
+    number = array[1];
+    print(number);
+}
