@@ -458,6 +458,9 @@ class Parser:
             exprs = self.array()
             return Expr.ArrayExpr(exprs)
 
+        if self.match(TType.LeftBBrace):
+            return self.map()
+
         if self.match(TType.LeftBrace):
             stmts = self.block()
             return Expr.BlockExpr(stmts)
@@ -466,6 +469,7 @@ class Parser:
         self.report_err(tok, f"Unexpected token '{tok.ttype.value}'")
 
     def array(self) -> list[ExprT]:
+        # todo: return Expr.Array
         out = []
         while not self.check(TType.RightBrack):
             out.append(self.expr())
@@ -474,6 +478,22 @@ class Parser:
 
         self.consume(TType.RightBrack, "Expected ']' after array.")
         return out
+
+    def map(self) -> Expr.Map:
+        out = []
+        while not self.check(TType.RightBBrace):
+            key = self.expr()
+            self.consume(TType.Colon, "Expected ':' after key.")
+            value = self.expr()
+
+            out.append((key, value))
+
+            if not self.match(TType.Comma):
+                break
+
+        self.consume(TType.RightBBrace, "Expected '}}' after map.")
+
+        return Expr.Map(out)
 
     """ Utils """
 

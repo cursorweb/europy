@@ -247,7 +247,9 @@ class Resolver(ExprVisitor, StmtVisitor):
             self.rexpr(itm)
 
     def map(self, e: Map):
-        raise Exception()
+        for k, v in e.itms:
+            self.rexpr(k)
+            self.rexpr(v)
 
     def range(self, e: RangeExpr):
         self.rexpr(e.start)

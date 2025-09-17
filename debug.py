@@ -110,7 +110,14 @@ class Printer(ExprVisitor[str], StmtVisitor[str]):
         return f"[{', '.join(items)}]"
 
     def map(self, e: "Map"):
-        raise Exception()
+        self.indent += 1
+        out = ""
+        for k, v in e.itms:
+            out += f"{TAB*self.indent}{self.eval_expr(k)}: {self.eval_expr(v)},\n"
+        self.indent -= 1
+        t = TAB * self.indent
+
+        return f"{{{{\n{out}{t}}}}}"
 
     def range(self, e: "RangeExpr"):
         eq = "=" if e.inclusive else ""

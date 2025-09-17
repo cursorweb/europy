@@ -10,6 +10,7 @@ This is **NOT** a replacement for Europa, nor is it a rewrite. This is just for 
         // runs forever
     }
     ```
+* Fixed `do while` loop
 * Function rework
     ```eo
     fn add(a, b, c = 5) {
@@ -57,9 +58,14 @@ This is **NOT** a replacement for Europa, nor is it a rewrite. This is just for 
     The rules are simple: you can omit a semicolon if it is there is a right brace or it is the end of file.
 
     *of course not everything, like variable declarations still need a semicolon, and return statements as well.
-* Module strategy: imported modules need to have a `mod` statement (or something similar) as the first statement, and they may not run code. Then, whenever a file is referenced, load it in. And then execute the main file.
 * For loops are back! There is an added `else` branch which runs if the for loop doesn't pass `break` (like python).
-* Index operations: return an error always, just because it's easier to implement, and it's not a very useful feature to return null (for now)
+* Index operations: return an error if out of bounds always, just because it's easier to implement, and it's not a very useful feature to return null (for now)
+    * `a()[3] = 5` is now valid syntax
+
+**Not implemented**
+* Tuples
+* Module strategy: imported modules need to have a `mod` statement (or something similar) as the first statement, and they may not run code. Then, whenever a file is referenced, load it in. And then execute the main file.
+* Sets `{{ 1, 2, 3 }}`
 
 ## Motivation
 i have new ideas for europa, after being on hiatus, and i feel like to iterate faster, i should use python.
