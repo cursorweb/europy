@@ -6,3 +6,5 @@ a[false]=3; // bug
 
 print(a);
 print(a['str']);
+print(a[false]);
+print(a[0]);

@@ -2,11 +2,16 @@ from error.error import EoTypeErrorResult, EoIndexErrorResult
 from .type import Bool, Type
 from .num import Num
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from parser.nodes.expr.node import MapExpr
+
 
 class Map(Type):
-    val: dict[Type, Type]
+    val: dict[str, Type]
 
-    def __init__(self, val: dict[Type, Type]):
+    def __init__(self, val: dict[str, Type]):
         super().__init__(val, "map")
 
     def less(self, right: "Type"):
@@ -26,16 +31,19 @@ class Map(Type):
         return self.val[idx]
 
     def set(self, index: "Type", val: "Type"):
-        # todo: actually have a hash
-        self.val[index.val] = val
+        self.val[self.key(index)] = val
+
+    @classmethod
+    def key(cls, k: "Type"):
+        return f"{k.tname}!{k.to_string()}"
 
     def validate_index(self, idx: "Type"):
-        i = idx.val
+        i = self.key(idx)
         if not i in self.val:
             raise EoIndexErrorResult(idx, f"{idx} does not exist")
 
         return i
 
     def to_string(self):
-        values = ", ".join([f"{k}: {v}" for k, v in self.val.items()])
+        values = ", ".join([f"{k.split('!', 1)[1]}: {v}" for k, v in self.val.items()])
         return f"{{{{ {values} }}}}"

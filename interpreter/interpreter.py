@@ -293,7 +293,7 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
             key = self.eval_expr(k)
             value = self.eval_expr(v)
 
-            out[key.val] = value
+            out[Map.key(key)] = value
 
         return Map(out)
 
