@@ -25,9 +25,6 @@ class String(Type):
 
         raise EoTypeErrorResult(self, right)
 
-    def to_string(self):
-        v = self.val.replace('"', '\\"')
-        return v
-
     def __repr__(self) -> str:
-        return f'"{self.to_string()}"'
+        v = self.val.replace('"', '\\"')
+        return f'"{v}"'

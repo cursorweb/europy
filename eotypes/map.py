@@ -35,7 +35,7 @@ class Map(Type):
 
     @classmethod
     def key(cls, k: "Type"):
-        return f"{k.tname}!{k.to_string()}"
+        return f"{k.tname}!{k!r}"
 
     def validate_index(self, idx: "Type"):
         i = self.key(idx)

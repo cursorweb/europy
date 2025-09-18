@@ -483,6 +483,8 @@ class Parser:
         out = []
         while not self.check(TType.RightBBrace):
             key = self.expr()
+            if isinstance(key, Expr.Variable):
+                key = Expr.LiteralVal(eotypes.String(key.name.data))
             self.consume(TType.Colon, "Expected ':' after key.")
             value = self.expr()
 

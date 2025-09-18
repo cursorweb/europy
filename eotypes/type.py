@@ -12,6 +12,7 @@ class Type(ABC):
         self.tname = tname
 
     def to_string(self):
+        """Return the printable version"""
         return str(self.val)
 
     def plus(self, right: "Type") -> "Type":

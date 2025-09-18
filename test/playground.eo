@@ -1,10 +1,2 @@
-var a = {{ 0:5, 1:if true{1}else{3}, 3:4 }};
-a[1] = 10;
-
-a["str"] = 3;
-a[false]=3; // bug
-
-print(a);
-print(a['str']);
-print(a[false]);
-print(a[0]);
+{var a = "hello";
+print({{ (a): "world", a: "b" }});}

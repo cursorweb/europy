@@ -21,7 +21,7 @@ This is **NOT** a replacement for Europa, nor is it a rewrite. This is just for 
     No longer *need* to name optional arguments (e.g. `c = 3`). You can, however, they must come after unnamed (positional) arguments. Function binding is now very similar to python's strategy.
     
     Also, you can't have duplicate parameters. This no longer works:
-    ```
+    ```eo
     fn dup(a, a) {}
     ```
 * Function printing
@@ -59,7 +59,12 @@ This is **NOT** a replacement for Europa, nor is it a rewrite. This is just for 
     *of course not everything, like variable declarations still need a semicolon, and return statements as well.
 * For loops are back! There is an added `else` branch which runs if the for loop doesn't pass `break` (like python).
 * Index operations: return an error if out of bounds always, just because it's easier to implement, and it's not a very useful feature to return null (for now)
-    * `a()[3] = 5` is now valid syntax
+* Maps:
+    ```eo
+    var a = "hello";
+    {{ a: 5, b: 6 }} == {{ "a": 5, "b": 6 }}
+    {{ (a): 5 }} == {{ "hello": 5 }}
+    ```
 
 **Not implemented**
 * Tuples
@@ -67,9 +72,16 @@ This is **NOT** a replacement for Europa, nor is it a rewrite. This is just for 
 * Sets `{{ 1, 2, 3 }}`
 * Splitting `}}` like how c++ splits `>>`
 
+**Notes**
+* `to_string` of a type returns the printable version,
+* while `__repr__` which usually returns `to_string`, for strings, will add the quotes
+
 ## Motivation
 i have new ideas for europa, after being on hiatus, and i feel like to iterate faster, i should use python.
+
+## Links
 https://rust-hosted-langs.github.io/book/introduction.html
+https://github.com/flamegraph-rs/flamegraph
 
 ---
 **old motivation:**
