@@ -207,7 +207,7 @@ class ArrayExpr(Expr):
         return v.array(self)
 
 
-class Map(Expr):
+class MapExpr(Expr):
     def __init__(self, itms: list[tuple[Expr, Expr]]):
         self.itms = itms
 

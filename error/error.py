@@ -47,14 +47,14 @@ class EoTypeError(EoError):
 
 
 class EoErrorResult(ABC, BaseException):
+    """Raise a type error that gets promoted to a EoTypeError (EoErrorResult does not have line info)"""
+
     @abstractmethod
     def with_lf(self, op: "Token") -> EoError:
         pass
 
 
 class EoTypeErrorResult(EoErrorResult):
-    """Raise a type error that gets promoted to a EoTypeError (EoTypeErrorResult does not have line info)"""
-
     def __init__(self, *types: "Type"):
         self.types = map(lambda t: t.tname, types)
 

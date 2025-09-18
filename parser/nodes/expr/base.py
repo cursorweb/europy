@@ -80,7 +80,7 @@ class ExprVisitor(ABC, Generic[T]):
         raise Exception()
 
     @abstractmethod
-    def map(self, e: "Map") -> T:
+    def map(self, e: "MapExpr") -> T:
         raise Exception()
 
     @abstractmethod

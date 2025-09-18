@@ -269,10 +269,12 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
         return callee.call(e.paren, args, named_args)
 
     def get(self, e: Get):
-        name = self.eval_expr(e.name)
-        idx = self.eval_expr(e.idx)
-        # todo: checkers
-        return name.val[int(idx.val)]
+        try:
+            name = self.eval_expr(e.name)
+            idx = self.eval_expr(e.idx)
+            return name.get(idx)
+        except EoErrorResult as err:
+            raise err.with_lf(e.brack)
 
     def prop(self, e: Prop):
         raise Exception()
@@ -284,8 +286,16 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
             items.append(itm.visit(self))
         return Array(items)
 
-    def map(self, e: Map):
-        raise Exception()
+    def map(self, e: MapExpr):
+        out = {}
+
+        for k, v in e.itms:
+            key = self.eval_expr(k)
+            value = self.eval_expr(v)
+
+            out[key.val] = value
+
+        return Map(out)
 
     def range(self, e: RangeExpr):
         inclusive = e.dot.ttype == TType.DotEq

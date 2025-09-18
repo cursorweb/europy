@@ -44,11 +44,10 @@ This is **NOT** a replacement for Europa, nor is it a rewrite. This is just for 
         }
     }
 
-    var sum_of_five = { // todo: add for loops and make this better!
-        var i = 0, sum = 0;
-        while i <= 5 {
-            sum += i;
-            i += 1
+    var sum_of_five = {
+        var sum = 0;
+        for i in 1..=5 {
+            sum += i
         }
         sum
     };
@@ -66,9 +65,11 @@ This is **NOT** a replacement for Europa, nor is it a rewrite. This is just for 
 * Tuples
 * Module strategy: imported modules need to have a `mod` statement (or something similar) as the first statement, and they may not run code. Then, whenever a file is referenced, load it in. And then execute the main file.
 * Sets `{{ 1, 2, 3 }}`
+* Splitting `}}` like how c++ splits `>>`
 
 ## Motivation
 i have new ideas for europa, after being on hiatus, and i feel like to iterate faster, i should use python.
+https://rust-hosted-langs.github.io/book/introduction.html
 
 ---
 **old motivation:**

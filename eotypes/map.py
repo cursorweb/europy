@@ -6,7 +6,7 @@ from .num import Num
 class Map(Type):
     val: dict[Type, Type]
 
-    def __init__(self, val: list[Type]):
+    def __init__(self, val: dict[Type, Type]):
         super().__init__(val, "map")
 
     def less(self, right: "Type"):
@@ -26,11 +26,16 @@ class Map(Type):
         return self.val[idx]
 
     def set(self, index: "Type", val: "Type"):
-        idx = self.validate_index(index)
-        self.val[idx] = val
+        # todo: actually have a hash
+        self.val[index.val] = val
 
     def validate_index(self, idx: "Type"):
-        if not idx in self.val:
+        i = idx.val
+        if not i in self.val:
             raise EoIndexErrorResult(idx, f"{idx} does not exist")
 
-        return idx
+        return i
+
+    def to_string(self):
+        values = ", ".join([f"{k}: {v}" for k, v in self.val.items()])
+        return f"{{{{ {values} }}}}"

@@ -109,7 +109,7 @@ class Printer(ExprVisitor[str], StmtVisitor[str]):
         items = [self.eval_expr(itm) for itm in e.itms]
         return f"[{', '.join(items)}]"
 
-    def map(self, e: "Map"):
+    def map(self, e: "MapExpr"):
         self.indent += 1
         out = ""
         for k, v in e.itms:

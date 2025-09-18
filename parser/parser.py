@@ -479,7 +479,7 @@ class Parser:
         self.consume(TType.RightBrack, "Expected ']' after array.")
         return out
 
-    def map(self) -> Expr.Map:
+    def map(self) -> Expr.MapExpr:
         out = []
         while not self.check(TType.RightBBrace):
             key = self.expr()
@@ -493,7 +493,7 @@ class Parser:
 
         self.consume(TType.RightBBrace, "Expected '}}' after map.")
 
-        return Expr.Map(out)
+        return Expr.MapExpr(out)
 
     """ Utils """
 

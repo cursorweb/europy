@@ -246,7 +246,7 @@ class Resolver(ExprVisitor, StmtVisitor):
         for itm in e.itms:
             self.rexpr(itm)
 
-    def map(self, e: Map):
+    def map(self, e: MapExpr):
         for k, v in e.itms:
             self.rexpr(k)
             self.rexpr(v)
