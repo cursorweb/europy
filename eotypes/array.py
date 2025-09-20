@@ -1,4 +1,4 @@
-from error.error import EoTypeErrorResult, EoIndexErrorResult
+from error.error import EoTypeErrorResult, EoIndexErrorResult, EoPropErrorResult
 from .type import Bool, Type
 from .num import Num
 
@@ -44,3 +44,9 @@ class Array(Type):
             )
 
         return int(idx)
+
+    def prop(self, name: str) -> "Type":
+        # TODO: make this efficient
+        if name == "len":
+            return Num(len(self.val))
+        raise EoPropErrorResult(name, self.tname)

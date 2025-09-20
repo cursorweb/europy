@@ -31,6 +31,7 @@ This is **NOT** a replacement for Europa, nor is it a rewrite. This is just for 
     fn a() {}
     println(a); // <fn a> instead of <User Fn a>
     ```
+* Added print which is the same as println.
 * Strings. They now compare by length (although in the future, this may be alphanumerically, like 'a' < 'b')
 * Expressions. Everything* is an expression now. So, these examples are possible:
     ```eo
@@ -64,6 +65,11 @@ This is **NOT** a replacement for Europa, nor is it a rewrite. This is just for 
     var a = "hello";
     {{ a: 5, b: 6 }} == {{ "a": 5, "b": 6 }}
     {{ (a): 5 }} == {{ "hello": 5 }}
+    ```
+* Arrays and maps now have properties just like modules.
+    ```eo
+    var a = {{ "a": 3, "b": 4 }};
+    println(a.len) // 2
     ```
 
 **Not implemented**

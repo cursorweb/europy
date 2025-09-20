@@ -51,8 +51,10 @@ class Resolver(ExprVisitor, StmtVisitor):
     def rblock(self, nodes: list[Stmt], start_scope=True):
         if start_scope:
             self.begin_scope()
+
         for node in nodes:
             self.rstmt(node)
+
         if start_scope:
             self.end_scope()
 
@@ -240,7 +242,10 @@ class Resolver(ExprVisitor, StmtVisitor):
         self.rexpr(e.idx)
 
     def prop(self, e: Prop):
-        raise Exception()
+        # we don't have to resolve the identifier because they are essentially in the "global scope"
+        # either of the file, or on the object (array, etc.) itself.
+        # essentially, treat it like indexing a map. Who cares if the value exists? You'll find it or you don't.
+        self.rexpr(e.val)
 
     def array(self, e: ArrayExpr):
         for itm in e.itms:

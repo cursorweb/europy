@@ -1,5 +1,5 @@
 from typing import Any
-from error.error import EoTypeErrorResult
+from error.error import EoTypeErrorResult, EoPropErrorResult
 from abc import ABC
 
 
@@ -62,6 +62,9 @@ class Type(ABC):
 
     def set(self, index: "Type", val: "Type") -> None:
         raise EoTypeErrorResult(self, index)
+
+    def prop(self, name: str) -> "Type":
+        raise EoPropErrorResult(name, self.tname)
 
     def __repr__(self) -> str:
         return self.to_string()

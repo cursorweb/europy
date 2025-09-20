@@ -1,4 +1,4 @@
-from error.error import EoTypeErrorResult, EoIndexErrorResult
+from error.error import EoTypeErrorResult, EoIndexErrorResult, EoPropErrorResult
 from .type import Bool, Type
 from .num import Num
 
@@ -43,6 +43,11 @@ class Map(Type):
             raise EoIndexErrorResult(idx, f"{idx} does not exist")
 
         return i
+
+    def prop(self, name: str) -> "Type":
+        if name == "len":
+            return Num(len(self.val))
+        raise EoPropErrorResult(name, self.tname)
 
     def to_string(self):
         values = ", ".join([f"{k.split('!', 1)[1]}: {v}" for k, v in self.val.items()])

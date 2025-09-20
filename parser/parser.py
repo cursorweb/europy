@@ -13,7 +13,6 @@ from tokens import TType, Token
 
 
 class Parser:
-    # todo: add sync
     def __init__(self, tokens: list[Token]):
         self.tokens = tokens
         self.i = 0
@@ -252,7 +251,7 @@ class Parser:
 
     def range(self) -> ExprT:
         expr = self.ternary()
-        # todo: add infinite ranges
+        # TODO: add infinite ranges
         if self.match(TType.DotDot):
             dot = self.prev()
             right = self.expr()
@@ -423,6 +422,11 @@ class Parser:
                 idx = self.expr()
                 self.consume(TType.RightBrack, "Expected ']' after indexing.")
                 expr = Expr.Get(expr, brack, idx)
+            elif self.match(TType.Dot):
+                name = self.consume(
+                    TType.Identifier, "Expected variable name after property getter."
+                )
+                expr = Expr.Prop(expr, name)
             else:
                 break
         return expr
@@ -469,7 +473,7 @@ class Parser:
         self.report_err(tok, f"Unexpected token '{tok.ttype.value}'")
 
     def array(self) -> list[ExprT]:
-        # todo: return Expr.Array
+        # TODO: return Expr.Array
         out = []
         while not self.check(TType.RightBrack):
             out.append(self.expr())

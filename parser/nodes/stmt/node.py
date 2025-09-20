@@ -4,7 +4,6 @@ from .base import Stmt, StmtVisitor
 
 from tokens import Token
 
-# todo: remove statements
 """
 class (Stmt):
     def __init__(self, ):

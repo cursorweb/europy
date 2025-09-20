@@ -277,7 +277,13 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
             raise err.with_lf(e.brack)
 
     def prop(self, e: Prop):
-        raise Exception()
+        val = self.eval_expr(e.val)
+        name = e.name.data
+
+        try:
+            return val.prop(name)
+        except EoErrorResult as err:
+            raise err.with_lf(e.name)
 
     def array(self, e: ArrayExpr):
         items = []

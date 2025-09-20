@@ -4,7 +4,6 @@ from tokens import Token, TType
 
 
 # todos: those cool errors (tm)
-# todo: fix self.peek() so that i = 0 isn't read initially
 class Lexer:
     i = 0
     tokens: list[Token] = []
@@ -69,7 +68,7 @@ class Lexer:
         while self.is_valid():
             char = self.next()
 
-            # todo: use match
+            # TODO: use match
             if char == "{":
                 if self.match("{"):
                     self.append_token(TType.LeftBBrace)

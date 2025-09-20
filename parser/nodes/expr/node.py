@@ -189,10 +189,10 @@ class Get(Expr):
 
 
 class Prop(Expr):
-    """`<mod>.<func>`"""
+    """`<val>.<func>`"""
 
-    def __init__(self, mod: Expr, name: Token):
-        self.mod = mod
+    def __init__(self, val: Expr, name: Token):
+        self.val = val
         self.name = name
 
     def visit(self, v: "ExprVisitor"):

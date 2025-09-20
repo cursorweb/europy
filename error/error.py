@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
+from tokens import Token
+
 if TYPE_CHECKING:
     from tokens import Token
     from eotypes import Type
@@ -73,6 +75,17 @@ class EoIndexErrorResult(EoErrorResult):
     def with_lf(self, op: "Token"):
         msg = f": {self.message}" if self.message != None else ""
         return EoTypeError(op.lf, f"Invalid index '{self.key}'{msg}.")
+
+
+class EoPropErrorResult(EoErrorResult):
+    def __init__(self, key: str, tname: str) -> None:
+        self.key = key
+        self.tname = tname
+
+    def with_lf(self, op: Token) -> EoError:
+        raise EoTypeError(
+            op.lf, f"Property '{self.key}' does not exist on '{self.tname}'"
+        )
 
 
 class LoopBreak(BaseException):

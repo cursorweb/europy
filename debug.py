@@ -103,7 +103,7 @@ class Printer(ExprVisitor[str], StmtVisitor[str]):
         return f"{self.eval_expr(e.name)}[{self.eval_expr(e.idx)}]"
 
     def prop(self, e: "Prop"):
-        raise Exception()
+        return f"{self.eval_expr(e.val)}.{e.name.data}"
 
     def array(self, e: "ArrayExpr"):
         items = [self.eval_expr(itm) for itm in e.itms]
