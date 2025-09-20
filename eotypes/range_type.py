@@ -1,5 +1,6 @@
-from error.error import EoTypeErrorResult
+from error.error import EoTypeErrorResult, EoPropErrorResult
 from .type import Bool, Type
+from .num import Num
 
 
 class Range(Type):
@@ -11,6 +12,7 @@ class Range(Type):
     len: int
 
     def __init__(self, start: int, end: int, inclusive: bool):
+        # todo: make it actually int
         super().__init__(None, "range")
         self.start = start
         self.end = end
@@ -31,3 +33,12 @@ class Range(Type):
             return Bool(self.len < right.len)
 
         raise EoTypeErrorResult(self, right)
+
+    def prop(self, name: str) -> "Type":
+        # TODO: make this efficient
+        if name == "len":
+            return Num(self.len)
+        raise EoPropErrorResult(name, self.tname)
+
+    def to_string(self):
+        return f"{self.start}..{'=' if self.inclusive else ''}{self.end}"
