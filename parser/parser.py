@@ -39,8 +39,8 @@ class Parser:
         if self.match(TType.Fn):
             return self.fn_decl()
 
-        if self.match(TType.Use):
-            raise Exception()
+        # if self.match(TType.Use):
+        #     return self.use_decl()
 
         return self.expr_stmt()
 

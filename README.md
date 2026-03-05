@@ -73,9 +73,17 @@ This is **NOT** a replacement for Europa, nor is it a rewrite. This is just for 
     ```
 
 **Not implemented**
-* Tuples
-* Module strategy: imported modules need to have a `mod` statement (or something similar) as the first statement, and they may not run code. Then, whenever a file is referenced, load it in. And then execute the main file.
+* Module strategy: imported modules need to have a `mod` statement (or something similar) as the first statement, and they may not run code, i.e. only declarations are allowed. Then, whenever a file is referenced, load it in. And then execute the main file. Use `pub` to make variables able to be imported
+    ```eo
+    use <file>.function;
+    ```
 * Sets `{{ 1, 2, 3 }}`
+* Tuples `(1, 2, 3)`, and destructuring them:
+    ``` eo
+    var (a, ..b) = (1, 2, 3);
+    // a == 1
+    // b == (2, 3)
+    ```
 * Splitting `}}` like how c++ splits `>>`
 
 **Notes**

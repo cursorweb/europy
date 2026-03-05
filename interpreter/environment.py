@@ -1,5 +1,5 @@
 from eotypes import Type
-from error import EoRuntimeError
+from error import EoRuntimeError, EoRuntimeErrorResult
 from tokens import Token
 
 
@@ -64,6 +64,15 @@ class Environment:
         assert not self.parent
 
         raise EoRuntimeError(token.lf, f"Undefined variable '{name}'.")
+
+    def get_str(self, name: str) -> Type:
+        if name in self.values:
+            return self.values[name]
+
+        # should be global
+        assert not self.parent
+
+        raise EoRuntimeErrorResult(f"Undefined variable '{name}'.")
 
     def assign_at(self, token: Token, value: Type, scope: int):
         name = token.data

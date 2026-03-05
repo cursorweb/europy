@@ -56,6 +56,14 @@ class EoErrorResult(ABC, BaseException):
         pass
 
 
+class EoRuntimeErrorResult(EoErrorResult):
+    def __init__(self, msg: str) -> None:
+        self.msg = msg
+
+    def with_lf(self, op: "Token") -> EoError:
+        return EoRuntimeError(op.lf, self.msg)
+
+
 class EoTypeErrorResult(EoErrorResult):
     def __init__(self, *types: "Type"):
         self.types = map(lambda t: t.tname, types)
