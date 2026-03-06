@@ -1,28 +1,40 @@
 from typing import Iterable
 
 from eotypes.callable import Callable, EoFunction, make_fn
-from error.error import EoTypeError, EoErrorResult, FnReturn, LoopBreak, LoopContinue
+from error.error import (
+    EoTypeError,
+    EoErrorResult,
+    EoRuntimeError,
+    FnReturn,
+    LoopBreak,
+    LoopContinue,
+)
 from interpreter.environment import Environment
+from lexer import Lexer
 from parser.nodes.expr.base import Expr, ExprVisitor
 from parser.nodes.stmt.base import Stmt, StmtVisitor
 
+from parser.parser import Parser
+from parser.resolver import Resolver
 from tokens import TType
 
 from eotypes import *
+from eotypes.module import *
 
 from parser.nodes.expr.node import *
 from parser.nodes.stmt.node import *
 
 import time
+import os
 
 
 class Interpreter(ExprVisitor[Type], StmtVisitor):
-    env: Environment
-
-    def __init__(self, tree: list[Stmt]):  # expr for now
+    def __init__(self, tree: list[Stmt], file_path: str):
         self.trees = tree
         self.globals = Environment()
         self.env = self.globals
+        self.module_cache: dict[str, Module] = {}
+        self.file_path = file_path
         """
         Note how we need both globals end env.
         If we just had env, which I think the old rust version had,
@@ -160,7 +172,20 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
         self.env.define(name, EoFunction(name, params, opt_params, block, self))
 
     def use_stmt(self, e: UseStmt):
-        raise Exception()
+        module_name = e.name.data
+        module = self.load_module(e.name)
+
+        if e.mod_type.mods:
+            # use io.{println};
+            for tok in e.mod_type.mods:
+                self.env.define(tok.data, module.prop(tok.data))
+        elif not e.mod_type.all:
+            # use io;
+            self.env.define(module_name, module)
+        else:
+            # use io.*;
+            for key in module.val.values:
+                self.env.define(key, module.val.values[key])
 
     """ Expr """
 
@@ -314,6 +339,62 @@ class Interpreter(ExprVisitor[Type], StmtVisitor):
         return Range(start.val, end.val, inclusive)
 
     """ Util """
+
+    def load_module(self, name: Token) -> "Module":
+        module_name = name.data
+        if module_name in self.module_cache:
+            mod = self.module_cache[module_name]
+            if mod.status == ModuleState.Loading:
+                raise EoRuntimeError(name.lf, f"Cyclic import: {module_name}")
+            return mod
+
+        mod = Module(Environment())
+        self.module_cache[module_name] = mod
+        mod.status = ModuleState.Loading
+
+        path = self.resolve_module_path(name)
+
+        # lexer
+        lexer = Lexer.from_file(path)
+        tokens = lexer.run()
+
+        # parser
+        parser = Parser(tokens)
+        errs, stmts = parser.run()
+        if len(errs):
+            for err in errs:
+                err.display()
+
+            raise EoRuntimeError(
+                name.lf, f"Imported module '{module_name}' had errors."
+            )
+
+        # resolver
+        resolver = Resolver(stmts)
+        errs = resolver.run()
+        if len(errs):
+            for err in errs:
+                err.display()
+
+            raise EoRuntimeError(
+                name.lf, f"Imported module '{module_name}' had errors."
+            )
+
+        self.eval_block(stmts, mod.val)
+
+        mod.status = ModuleState.Loaded
+        return mod
+
+    def resolve_module_path(self, name: Token) -> str:
+        module_name = name.data
+        rel_path = module_name + ".eo"
+
+        base_dir = os.path.dirname(self.file_path)
+        candidate = os.path.join(base_dir, rel_path)
+        if os.path.isfile(candidate):
+            return os.path.abspath(candidate)
+
+        raise EoTypeError(name.lf, f"Module '{module_name}' not found at '{rel_path}'")
 
     def eval_block(self, stmts: list[Stmt], env: Environment | None = None) -> Type:
         """Pass in an `env` because for functions, they need to declare their parameters"""

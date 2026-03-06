@@ -1,6 +1,6 @@
 from .type import Type
 from enum import Enum
-from ..interpreter.environment import Environment
+from interpreter.environment import Environment
 
 
 class ModuleState(Enum):

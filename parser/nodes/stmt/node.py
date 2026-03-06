@@ -59,6 +59,10 @@ class FunctionDecl(Stmt):
 
 class UseStmt(Stmt):
     class ImportType:
+        """
+        'variadic enum' -> empty, mods, all
+        """
+
         mods: list[Token]
 
         def __init__(self):
@@ -89,7 +93,7 @@ class UseStmt(Stmt):
 
     def __init__(self, name: Token, imp_type: ImportType):
         self.name = name
-        self.imp_type = imp_type
+        self.mod_type = imp_type
 
     def visit(self, v: StmtVisitor):
         return v.use_stmt(self)

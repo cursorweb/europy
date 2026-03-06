@@ -192,7 +192,17 @@ class Resolver(ExprVisitor, StmtVisitor):
         self.end_scope()
 
     def use_stmt(self, e: UseStmt):
-        raise Exception()
+        if e.mod_type.mods:
+            # use io.{println};
+            for tok in e.mod_type.mods:
+                self.declare(tok.data)
+                self.define(tok.data)
+        elif e.mod_type.all == False:
+            self.declare(e.name.data)
+            self.define(e.name.data)
+        else:
+            # TODO: figure out * imports (should be top level only)
+            pass
 
     """ Expr """
 

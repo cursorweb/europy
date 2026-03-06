@@ -37,7 +37,26 @@ class Printer(ExprVisitor[str], StmtVisitor[str]):
         return f"fn {e.name.data}({', '.join([tok.data for tok in e.params])}{opt_params}) {self.print_block(e.block)}"
 
     def use_stmt(self, e):
-        raise Exception()
+        """
+        Return a textual representation of a use statement.
+        Examples:
+
+        use io;
+        use io.*;
+        use io.{println, print};
+        use utils.math.trig;
+        """
+        # Module path
+        name_str = e.name.data
+        imp_type = e.mod_type
+
+        if imp_type.all:
+            return f"use {name_str}.*;"
+        elif imp_type.mods:
+            mods_str = ", ".join(tok.data for tok in imp_type.mods)
+            return f"use {name_str}.{{{mods_str}}};"
+        else:
+            return f"use {name_str};"
 
     """ expr like """
 

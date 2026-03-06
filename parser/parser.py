@@ -39,8 +39,8 @@ class Parser:
         if self.match(TType.Fn):
             return self.fn_decl()
 
-        # if self.match(TType.Use):
-        #     return self.use_decl()
+        if self.match(TType.Use):
+            return self.use_decl()
 
         return self.expr_stmt()
 
@@ -105,6 +105,48 @@ class Parser:
         stmts = self.block()
 
         return Stmt.FunctionDecl(name, params, opt_params, stmts)
+
+    def use_decl(self) -> StmtT:
+        name = self.consume(TType.Identifier, "Expected module name after 'use'.")
+
+        # Default: `use io;`
+        imp_type = Stmt.UseStmt.ImportType.mod()
+
+        if self.match(TType.Dot):
+            if self.match(TType.Times):
+                # use io.*;
+                imp_type = Stmt.UseStmt.ImportType.star()
+
+            elif self.match(TType.LeftBrace):
+                # use io.{println, print};
+
+                names = []
+
+                names.append(
+                    self.consume(
+                        TType.Identifier, "Expected identifier in import list."
+                    )
+                )
+
+                while self.match(TType.Comma):
+                    names.append(
+                        self.consume(
+                            TType.Identifier, "Expected identifier in import list."
+                        )
+                    )
+
+                self.consume(TType.RightBrace, "Expected '}' after import list.")
+
+                imp_type = Stmt.UseStmt.ImportType.mult(names)
+
+            else:
+                raise self.report_err(
+                    self.peek(), "Expected '*' or '{' after '.' in use statement."
+                )
+
+        self.consume(TType.Semi, "Expected ';' after use statement.")
+
+        return Stmt.UseStmt(name, imp_type)
 
     def expr_stmt(self) -> StmtT:
         expr = self.expr_like()

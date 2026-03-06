@@ -9,7 +9,9 @@ from sys import exit
 from error import EoError
 from parser.resolver import Resolver
 
-lexer = Lexer.from_file("./test/playground.eo")  # playground.eo")
+FILENAME = "./test/playground.eo"
+
+lexer = Lexer.from_file(FILENAME)
 try:
     tokens = lexer.run()
 except EoError as e:
@@ -23,6 +25,10 @@ if len(errs):
         err.display()
     exit()
 
+for tree in trees:
+    pass
+    print(Printer(tree).run())
+
 resolver = Resolver(trees)
 errs = resolver.run()
 if len(errs):
@@ -30,12 +36,7 @@ if len(errs):
         err.display()
     exit()
 
-for tree in trees:
-    pass
-    # print(tree)
-    print(Printer(tree).run())
-
-interpreter = Interpreter(trees)
+interpreter = Interpreter(trees, FILENAME)
 
 try:
     # dbg:
